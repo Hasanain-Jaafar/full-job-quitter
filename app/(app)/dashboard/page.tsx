@@ -1,194 +1,335 @@
 import Link from "next/link"
 import {
-  Calculator,
-  Route,
-  TrendingUp,
   Wallet,
+  TrendingDown,
+  
   Calendar,
+  ArrowUpRight,
+  Target,
+  Route,
+  Receipt,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
+import { WelcomeHeader } from "@/components/dashboard/welcome-header"
+import { StatPill } from "@/components/dashboard/stat-pill"
+import { ExpenseBarChart } from "@/components/dashboard/expense-bar-chart"
+import { CircularProgress } from "@/components/dashboard/circular-progress"
+import { SubscriptionLoanCard } from "@/components/dashboard/subscription-loan-card"
+import { RecentExpenses } from "@/components/dashboard/recent-expenses"
+import { MilestoneMiniList } from "@/components/dashboard/milestone-mini-list"
 import { getFinancialGoal } from "@/lib/financial/actions"
 import { getMilestones } from "@/lib/milestones/actions"
+import {
+  getCategories,
+  getExpenses,
+  getSubscriptions,
+  getLoans,
+} from "@/lib/finances/actions"
+import { createClient } from "@/lib/supabase/server"
 import { calculateRunway, formatCurrency, formatNumber } from "@/lib/calculator/utils"
 
 export default async function DashboardPage() {
-  const [goal, milestones] = await Promise.all([
+  const supabase = await createClient()
+  const { data: userData } = await supabase.auth.getUser()
+
+  const [goal, milestones, categories, expenses, subscriptions, loans] = await Promise.all([
     getFinancialGoal(),
     getMilestones(),
+    getCategories(),
+    getExpenses(),
+    getSubscriptions(),
+    getLoans(),
   ])
 
-  const hasGoal = !!goal
+  const profile = userData.user
+    ? await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", userData.user.id)
+        .single()
+    : null
+
+  const fullName = profile?.data?.full_name ?? userData.user?.email?.split("@")[0] ?? ""
+
   const completedMilestones = milestones.filter((m) => m.status === "completed").length
   const milestoneProgress = milestones.length > 0
-    ? Math.round((completedMilestones / milestones.length) * 100)
+    ? (completedMilestones / milestones.length) * 100
     : 0
 
-  const runway = hasGoal
+  const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0)
+  const totalSubscriptions = subscriptions.reduce((sum, s) => sum + Number(s.amount), 0)
+  const totalLoanPayments = loans.reduce((sum, l) => sum + Number(l.monthly_payment), 0)
+  const totalOutflows = totalExpenses + totalSubscriptions + totalLoanPayments
+
+  const monthlyIncome = Number(goal?.monthly_income) || 0
+  const netSavings = monthlyIncome - totalOutflows
+
+  const expensesByCategory: Record<string, number> = {}
+  expenses.forEach((expense) => {
+    const categoryId = expense.category_id ?? "uncategorized"
+    expensesByCategory[categoryId] = (expensesByCategory[categoryId] || 0) + Number(expense.amount)
+  })
+
+  const runway = goal
     ? calculateRunway({
-        monthlyExpenses: Number(goal.monthly_expenses),
+        monthlyExpenses: totalOutflows || Number(goal.monthly_expenses),
         currentSavings: Number(goal.current_savings),
-        monthlySavingsRate: Number(goal.monthly_savings_rate),
+        monthlySavingsRate: netSavings > 0 ? netSavings : Number(goal.monthly_savings_rate),
         targetRunwayMonths: goal.target_runway_months,
       })
     : null
 
+  const fundingProgress = goal && runway
+    ? Math.min((Number(goal.current_savings) / runway.requiredSavings) * 100, 100)
+    : 0
+
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">
-          Dashboard
-        </h1>
-        <p className="text-[#6e6e73] mt-1">
-          Your exit strategy at a glance.
-        </p>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <WelcomeHeader name={fullName} />
+        <div className="flex flex-wrap gap-3">
+          <StatPill label="Income" value={formatCurrency(monthlyIncome)} variant="default" />
+          <StatPill label="Expenses" value={formatCurrency(totalOutflows)} variant="dark" />
+          <StatPill label="Net savings" value={formatCurrency(netSavings)} variant="accent" />
+          <StatPill
+            label="Runway"
+            value={`${formatNumber(runway?.currentRunwayMonths ?? 0, 1)} mo`}
+            variant="default"
+          />
+        </div>
       </div>
 
-      {!hasGoal && (
-        <Card className="glass-panel rounded-2xl p-8 text-center">
-          <div className="max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-2xl bg-[#0066cc]/10 flex items-center justify-center mx-auto mb-6">
-              <Calculator size={28} strokeWidth={1.75} className="text-[#0066cc]" />
-            </div>
-            <h2 className="text-2xl font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] mb-3">
-              Start with your Freedom Calculator
-            </h2>
-            <p className="text-[#6e6e73] mb-6">
-              Tell us about your expenses and savings, and we&apos;ll calculate your runway to freedom.
-            </p>
-            <Link href="/calculator">
-              <Button className="rounded-xl bg-[#0066cc] hover:bg-[#0066cc]/90 text-white px-6 h-12">
-                Open calculator
-              </Button>
-            </Link>
+      {/* Main metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <Card className="bg-white rounded-3xl border-none shadow-sm p-6">
+          <p className="text-sm text-[#8a8a8a] mb-1">Total savings</p>
+          <p className="text-4xl font-semibold text-[#1d1d1f]">
+            {formatCurrency(Number(goal?.current_savings) || 0)}
+          </p>
+          <div className="mt-4 h-1.5 bg-[#f8f1de] rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#f5c542] rounded-full"
+              style={{ width: `${fundingProgress}%` }}
+            />
           </div>
         </Card>
-      )}
 
-      {hasGoal && runway && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <Card className="glass-panel rounded-2xl">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-[#6e6e73] flex items-center gap-2">
-                  <Wallet size={16} strokeWidth={1.75} />
-                  Current runway
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
-                  {formatNumber(runway.currentRunwayMonths, 1)} months
-                </p>
-              </CardContent>
-            </Card>
+        <Card className="bg-white rounded-3xl border-none shadow-sm p-6">
+          <p className="text-sm text-[#8a8a8a] mb-1">Freedom funded</p>
+          <p className="text-4xl font-semibold text-[#1d1d1f]">
+            {formatNumber(fundingProgress, 1)}%
+          </p>
+          <p className="text-sm text-[#8a8a8a] mt-2">
+            Goal: {formatCurrency(runway?.requiredSavings ?? 0)}
+          </p>
+        </Card>
 
-            <Card className="glass-panel rounded-2xl">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-[#6e6e73] flex items-center gap-2">
-                  <TrendingUp size={16} strokeWidth={1.75} />
-                  Target runway
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
-                  {goal.target_runway_months} months
-                </p>
-              </CardContent>
-            </Card>
+        <Card className="bg-white rounded-3xl border-none shadow-sm p-6">
+          <p className="text-sm text-[#8a8a8a] mb-1">Months to freedom</p>
+          <p className="text-4xl font-semibold text-[#1d1d1f]">
+            {runway?.projectedMonthsToGoal ?? "—"}
+          </p>
+          <p className="text-sm text-[#8a8a8a] mt-2">
+            {runway?.projectedQuitDate
+              ? runway.projectedQuitDate.toLocaleDateString("en-US", { month: "short", year: "numeric" })
+              : "Add your finances"}
+          </p>
+        </Card>
 
-            <Card className="glass-panel rounded-2xl">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-[#6e6e73] flex items-center gap-2">
-                  <Calendar size={16} strokeWidth={1.75} />
-                  Projected quit date
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
-                  {runway.projectedQuitDate
+        <Card className="bg-white rounded-3xl border-none shadow-sm p-6">
+          <p className="text-sm text-[#8a8a8a] mb-1">Active subscriptions</p>
+          <p className="text-4xl font-semibold text-[#1d1d1f]">
+            {subscriptions.length}
+          </p>
+          <p className="text-sm text-[#8a8a8a] mt-2">
+            {formatCurrency(totalSubscriptions)}/mo
+          </p>
+        </Card>
+      </div>
+
+      {/* Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Welcome / profile card */}
+        <Card className="lg:col-span-4 bg-[#f5c542] rounded-3xl border-none shadow-sm overflow-hidden">
+          <CardContent className="p-8 h-full flex flex-col justify-between">
+            <div>
+              <div className="w-16 h-16 rounded-2xl bg-white/30 flex items-center justify-center mb-6">
+                <Wallet size={32} strokeWidth={1.75} className="text-[#1d1d1f]" />
+              </div>
+              <h3 className="text-2xl font-semibold text-[#1d1d1f] mb-2">
+                Your escape fund
+              </h3>
+              <p className="text-[#1d1d1f]/70">
+                Track every dollar that brings you closer to quitting.
+              </p>
+            </div>
+            <Link href="/finances">
+              <Button className="mt-6 rounded-xl bg-[#1d1d1f] hover:bg-[#1d1d1f]/90 text-white">
+                Manage finances
+                <ArrowUpRight size={16} strokeWidth={1.75} className="ml-2" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* Expense breakdown */}
+        <Card className="lg:col-span-5 bg-white rounded-3xl border-none shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-lg font-semibold text-[#1d1d1f] flex items-center gap-2">
+              <Receipt size={18} strokeWidth={1.75} />
+              Expense breakdown
+            </CardTitle>
+            <Link href="/finances">
+              <Button variant="ghost" className="rounded-xl text-[#8a8a8a]">
+                Manage
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent>
+            <ExpenseBarChart categories={categories} expensesByCategory={expensesByCategory} />
+          </CardContent>
+        </Card>
+
+        {/* Milestone progress */}
+        <Card className="lg:col-span-3 bg-white rounded-3xl border-none shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-[#1d1d1f] flex items-center gap-2">
+              <Target size={18} strokeWidth={1.75} />
+              Milestones
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center">
+            <CircularProgress
+              value={milestoneProgress}
+              label={`${completedMilestones}/${milestones.length}`}
+              sublabel="completed"
+            />
+            <div className="w-full mt-6">
+              <MilestoneMiniList milestones={milestones} />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Subscriptions & loans dark card */}
+        <Card className="lg:col-span-4 bg-[#1d1d1f] rounded-3xl border-none shadow-sm">
+          <CardContent className="p-6 h-full">
+            <SubscriptionLoanCard subscriptions={subscriptions} loans={loans} />
+          </CardContent>
+        </Card>
+
+        {/* Recent expenses */}
+        <Card className="lg:col-span-4 bg-white rounded-3xl border-none shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-lg font-semibold text-[#1d1d1f] flex items-center gap-2">
+              <TrendingDown size={18} strokeWidth={1.75} />
+              Recent expenses
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RecentExpenses expenses={expenses} categories={categories} />
+          </CardContent>
+        </Card>
+
+        {/* Calendar / projected quit date */}
+        <Card className="lg:col-span-4 bg-white rounded-3xl border-none shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-[#1d1d1f] flex items-center gap-2">
+              <Calendar size={18} strokeWidth={1.75} />
+              Target timeline
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center justify-between">
+              <span className="text-[#8a8a8a]">Monthly runway target</span>
+              <span className="font-semibold text-[#1d1d1f]">
+                {goal?.target_runway_months ?? 0} months
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[#8a8a8a]">Required savings</span>
+              <span className="font-semibold text-[#1d1d1f]">
+                {formatCurrency(runway?.requiredSavings ?? 0)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[#8a8a8a]">Current runway</span>
+              <span className="font-semibold text-[#1d1d1f]">
+                {formatNumber(runway?.currentRunwayMonths ?? 0, 1)} months
+              </span>
+            </div>
+            <div className="h-24 bg-[#f8f1de] rounded-2xl flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-sm text-[#8a8a8a]">Projected quit date</p>
+                <p className="text-2xl font-semibold text-[#1d1d1f]">
+                  {runway?.projectedQuitDate
                     ? runway.projectedQuitDate.toLocaleDateString("en-US", {
-                        month: "short",
+                        month: "long",
                         year: "numeric",
                       })
-                    : "Funded"}
+                    : "—"}
                 </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="glass-panel rounded-2xl">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
-                Funding progress
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-[#6e6e73]">
-                  {formatCurrency(Number(goal.current_savings))} saved
-                </span>
-                <span className="text-[#1d1d1f] dark:text-[#f5f5f7] font-medium">
-                  Goal: {formatCurrency(runway.requiredSavings)}
-                </span>
               </div>
-              <Progress
-                value={Math.min(
-                  (Number(goal.current_savings) / runway.requiredSavings) * 100,
-                  100
-                )}
-                className="h-3 rounded-full bg-black/5 dark:bg-white/10"
-              />
-              {runway.isFunded && (
-                <p className="text-sm text-[#34c759] font-medium">
-                  You&apos;re fully funded for your target runway.
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </>
-      )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-      <Card className="glass-panel rounded-2xl">
+      {/* Milestones section */}
+      <Card className="bg-white rounded-3xl border-none shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] flex items-center gap-2">
+          <CardTitle className="text-lg font-semibold text-[#1d1d1f] flex items-center gap-2">
             <Route size={18} strokeWidth={1.75} />
-            Milestones
+            Your roadmap
           </CardTitle>
           <Link href="/milestones">
-            <Button variant="ghost" className="rounded-xl text-[#0066cc]">
+            <Button variant="ghost" className="rounded-xl text-[#8a8a8a]">
               View all
             </Button>
           </Link>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           {milestones.length === 0 ? (
             <div className="text-center py-6">
-              <p className="text-[#6e6e73] mb-4">
+              <p className="text-[#8a8a8a] mb-4">
                 No milestones yet. Create your roadmap to quitting.
               </p>
               <Link href="/milestones">
-                <Button className="rounded-xl bg-[#0066cc] hover:bg-[#0066cc]/90 text-white">
+                <Button className="rounded-xl bg-[#1d1d1f] hover:bg-[#1d1d1f]/90 text-white">
                   Add milestones
                 </Button>
               </Link>
             </div>
           ) : (
-            <>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-[#6e6e73]">
-                  {completedMilestones} of {milestones.length} completed
-                </span>
-                <span className="text-[#1d1d1f] dark:text-[#f5f5f7] font-medium">
-                  {milestoneProgress}%
-                </span>
-              </div>
-              <Progress
-                value={milestoneProgress}
-                className="h-3 rounded-full bg-black/5 dark:bg-white/10"
-              />
-            </>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {milestones.map((milestone) => (
+                <div
+                  key={milestone.id}
+                  className={`p-4 rounded-2xl border-l-4 ${
+                    milestone.status === "completed"
+                      ? "bg-[#34c759]/5 border-[#34c759]"
+                      : "bg-[#f8f1de] border-[#f5c542]"
+                  }`}
+                >
+                  <p
+                    className={`font-medium ${
+                      milestone.status === "completed"
+                        ? "text-[#8a8a8a] line-through"
+                        : "text-[#1d1d1f]"
+                    }`}
+                  >
+                    {milestone.title}
+                  </p>
+                  {milestone.description && (
+                    <p className="text-xs text-[#8a8a8a] mt-1">
+                      {milestone.description}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>

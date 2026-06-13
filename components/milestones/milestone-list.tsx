@@ -3,8 +3,6 @@
 import { useState, useTransition } from "react"
 import { motion } from "framer-motion"
 import {
-  Check,
-  Circle,
   Plus,
   Trash2,
   Loader2,
@@ -75,20 +73,20 @@ export function MilestoneList({ milestones }: MilestoneListProps) {
 
   if (!hasMilestones) {
     return (
-      <Card className="glass-panel rounded-2xl p-10 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-[#0066cc]/10 flex items-center justify-center mx-auto mb-6">
-          <Route size={28} strokeWidth={1.75} className="text-[#0066cc]" />
+      <Card className="bg-white rounded-3xl border-none shadow-sm p-10 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-[#1d1d1f]/10 flex items-center justify-center mx-auto mb-6">
+          <Route size={28} strokeWidth={1.75} className="text-[#f5c542]" />
         </div>
-        <h2 className="text-2xl font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] mb-3">
+        <h2 className="text-2xl font-semibold text-[#1d1d1f]  mb-3">
           Build your exit roadmap
         </h2>
-        <p className="text-[#6e6e73] mb-8 max-w-md mx-auto">
+        <p className="text-[#8a8a8a] mb-8 max-w-md mx-auto">
           Add the milestones that stand between you and your last day. Or start with our recommended checklist.
         </p>
         <Button
           onClick={handleSeed}
           disabled={isPending}
-          className="rounded-xl bg-[#0066cc] hover:bg-[#0066cc]/90 text-white px-6 h-12"
+          className="rounded-xl bg-[#1d1d1f] hover:bg-[#1d1d1f]/90 text-white px-6 h-12"
         >
           {isPending ? (
             <Loader2 className="animate-spin" size={18} strokeWidth={1.75} />
@@ -107,10 +105,10 @@ export function MilestoneList({ milestones }: MilestoneListProps) {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">
+          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-[#1d1d1f] ">
             Milestone Tracker
           </h1>
-          <p className="text-[#6e6e73] mt-1">
+          <p className="text-[#8a8a8a] mt-1">
             {completedCount} of {milestones.length} completed ({progress}%)
           </p>
         </div>
@@ -132,7 +130,7 @@ export function MilestoneList({ milestones }: MilestoneListProps) {
         <Button
           type="submit"
           disabled={isPending || !title.trim()}
-          className="h-12 rounded-xl bg-[#0066cc] hover:bg-[#0066cc]/90 text-white px-6"
+          className="h-12 rounded-xl bg-[#1d1d1f] hover:bg-[#1d1d1f]/90 text-white px-6"
         >
           {isPending ? (
             <Loader2 className="animate-spin" size={18} strokeWidth={1.75} />
@@ -154,10 +152,10 @@ export function MilestoneList({ milestones }: MilestoneListProps) {
             transition={{ delay: index * 0.05 }}
           >
             <Card
-              className={`glass-panel rounded-2xl border-l-4 transition-colors ${
+              className={`bg-white rounded-3xl border-none shadow-sm border-l-4 transition-colors ${
                 milestone.status === "completed"
                   ? "border-l-[#34c759]"
-                  : "border-l-[#0066cc]"
+                  : "border-l-[#f5c542]"
               }`}
             >
               <CardContent className="p-5 flex items-start gap-4">
@@ -167,35 +165,22 @@ export function MilestoneList({ milestones }: MilestoneListProps) {
                     handleToggle(milestone.id, milestone.status)
                   }
                   disabled={pendingId === milestone.id}
-                  className="mt-1 rounded-md border-[#0066cc] data-[state=checked]:bg-[#0066cc] data-[state=checked]:text-white"
+                  className="mt-1 size-5 rounded-full border-[#0066cc] data-[state=checked]:bg-[#1d1d1f] data-[state=checked]:text-white"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    {milestone.status === "completed" ? (
-                      <Check
-                        size={16}
-                        strokeWidth={1.75}
-                        className="text-[#34c759]"
-                      />
-                    ) : (
-                      <Circle
-                        size={16}
-                        strokeWidth={1.75}
-                        className="text-[#0066cc]"
-                      />
-                    )}
                     <h3
                       className={`font-semibold truncate ${
                         milestone.status === "completed"
-                          ? "text-[#6e6e73] line-through"
-                          : "text-[#1d1d1f] dark:text-[#f5f5f7]"
+                          ? "text-[#8a8a8a] line-through"
+                          : "text-[#1d1d1f] "
                       }`}
                     >
                       {milestone.title}
                     </h3>
                   </div>
                   {milestone.description && (
-                    <p className="text-sm text-[#6e6e73] mt-1">
+                    <p className="text-sm text-[#8a8a8a] mt-1">
                       {milestone.description}
                     </p>
                   )}
@@ -205,7 +190,7 @@ export function MilestoneList({ milestones }: MilestoneListProps) {
                   size="icon"
                   onClick={() => handleDelete(milestone.id)}
                   disabled={pendingId === milestone.id}
-                  className="rounded-xl text-[#6e6e73] hover:text-[#ff3b30] hover:bg-[#ff3b30]/10"
+                  className="rounded-xl text-[#8a8a8a] hover:text-[#ff3b30] hover:bg-[#ff3b30]/10"
                 >
                   {pendingId === milestone.id ? (
                     <Loader2 className="animate-spin" size={16} strokeWidth={1.75} />

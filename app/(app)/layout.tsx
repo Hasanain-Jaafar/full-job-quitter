@@ -16,11 +16,11 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="min-h-screen flex bg-[#f5f5f7] dark:bg-black">
+    <div className="min-h-screen flex bg-[#f8f1de]">
       <Sidebar />
       <MobileNav />
       <main className="flex-1 min-w-0 pt-24 lg:pt-0">
-        <div className="p-6 lg:p-10 max-w-6xl mx-auto">{children}</div>
+        <div className="p-6 lg:p-10 max-w-7xl mx-auto">{children}</div>
       </main>
     </div>
   )

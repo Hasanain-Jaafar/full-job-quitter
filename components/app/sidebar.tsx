@@ -8,6 +8,8 @@ import {
   Calculator,
   Route,
   BarChart3,
+  Wallet,
+  Settings,
   LogOut,
 } from "lucide-react"
 
@@ -20,6 +22,7 @@ const navItems = [
   { href: "/calculator", label: "Calculator", icon: Calculator },
   { href: "/milestones", label: "Milestones", icon: Route },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/finances", label: "Finances", icon: Wallet },
 ]
 
 export function Sidebar() {
@@ -30,18 +33,18 @@ export function Sidebar() {
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="hidden lg:flex flex-col w-64 h-screen sticky top-0 glass-panel border-r border-white/20"
+      className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-white/70 backdrop-blur-xl border-r border-[#e8e0cc]"
     >
       <div className="p-6">
         <Link
           href="/"
-          className="text-xl font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]"
+          className="text-xl font-semibold tracking-tight text-[#1d1d1f]"
         >
           full-jog-quitter
         </Link>
       </div>
 
-      <Separator className="bg-black/5 dark:bg-white/10" />
+      <Separator className="bg-[#e8e0cc]" />
 
       <nav className="flex-1 p-4 space-y-1">
         {navItems.map((item) => {
@@ -50,10 +53,10 @@ export function Sidebar() {
             <Link key={item.href} href={item.href}>
               <Button
                 variant={isActive ? "secondary" : "ghost"}
-                className={`w-full justify-start gap-3 h-11 rounded-xl text-[#1d1d1f] dark:text-[#f5f5f7] ${
+                className={`w-full justify-start gap-3 h-11 rounded-xl text-[#1d1d1f] ${
                   isActive
-                    ? "bg-[#0066cc]/10 text-[#0066cc] hover:bg-[#0066cc]/15"
-                    : "hover:bg-black/5 dark:hover:bg-white/10"
+                    ? "bg-[#f5c542]/20 text-[#1d1d1f] hover:bg-[#f5c542]/25"
+                    : "hover:bg-[#f8f1de]"
                 }`}
               >
                 <item.icon size={18} strokeWidth={1.75} />
@@ -64,12 +67,21 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="p-4">
+      <div className="p-4 space-y-1">
+        <Link href="/settings">
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3 h-11 rounded-xl text-[#1d1d1f] hover:bg-[#f8f1de]"
+          >
+            <Settings size={18} strokeWidth={1.75} />
+            Settings
+          </Button>
+        </Link>
         <form action={signOut}>
           <Button
             type="submit"
             variant="ghost"
-            className="w-full justify-start gap-3 h-11 rounded-xl text-[#6e6e73] hover:text-[#1d1d1f] dark:hover:text-[#f5f5f7] hover:bg-black/5 dark:hover:bg-white/10"
+            className="w-full justify-start gap-3 h-11 rounded-xl text-[#1d1d1f] hover:bg-[#f8f1de]"
           >
             <LogOut size={18} strokeWidth={1.75} />
             Sign out

@@ -9,9 +9,11 @@ import {
   Calculator,
   Route,
   BarChart3,
+  Wallet,
   Menu,
   X,
   LogOut,
+  Settings,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -23,6 +25,7 @@ const navItems = [
   { href: "/calculator", label: "Calculator", icon: Calculator },
   { href: "/milestones", label: "Milestones", icon: Route },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/finances", label: "Finances", icon: Wallet },
 ]
 
 export function MobileNav() {
@@ -32,10 +35,10 @@ export function MobileNav() {
   return (
     <>
       <header className="lg:hidden fixed top-0 left-0 right-0 z-40 p-4">
-        <div className="glass-panel rounded-2xl px-4 py-3 flex items-center justify-between">
+        <div className="bg-white/80 backdrop-blur-xl border border-[#e8e0cc] rounded-2xl px-4 py-3 flex items-center justify-between shadow-sm">
           <Link
             href="/"
-            className="text-lg font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]"
+            className="text-lg font-semibold tracking-tight text-[#1d1d1f]"
           >
             full-jog-quitter
           </Link>
@@ -65,10 +68,10 @@ export function MobileNav() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="lg:hidden fixed top-0 right-0 bottom-0 w-72 glass-panel z-50 p-6 flex flex-col"
+              className="lg:hidden fixed top-0 right-0 bottom-0 w-72 bg-[#f8f1de] z-50 p-6 flex flex-col"
             >
               <div className="flex items-center justify-between mb-8">
-                <span className="text-lg font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
+                <span className="text-lg font-semibold text-[#1d1d1f]">
                   Menu
                 </span>
                 <Button
@@ -90,8 +93,8 @@ export function MobileNav() {
                         variant={isActive ? "secondary" : "ghost"}
                         className={`w-full justify-start gap-3 h-12 rounded-xl ${
                           isActive
-                            ? "bg-[#0066cc]/10 text-[#0066cc] hover:bg-[#0066cc]/15"
-                            : "text-[#1d1d1f] dark:text-[#f5f5f7] hover:bg-black/5 dark:hover:bg-white/10"
+                            ? "bg-[#f5c542]/20 text-[#1d1d1f] hover:bg-[#f5c542]/25"
+                            : "text-[#1d1d1f] hover:bg-white/50"
                         }`}
                       >
                         <item.icon size={18} strokeWidth={1.75} />
@@ -102,18 +105,29 @@ export function MobileNav() {
                 })}
               </nav>
 
-              <Separator className="bg-black/5 dark:bg-white/10 my-4" />
+              <Separator className="bg-[#e8e0cc] my-4" />
 
-              <form action={signOut}>
-                <Button
-                  type="submit"
-                  variant="ghost"
-                  className="w-full justify-start gap-3 h-12 rounded-xl text-[#6e6e73] hover:text-[#1d1d1f] dark:hover:text-[#f5f5f7]"
-                >
-                  <LogOut size={18} strokeWidth={1.75} />
-                  Sign out
-                </Button>
-              </form>
+              <div className="space-y-2">
+                <Link href="/settings" onClick={() => setOpen(false)}>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12 rounded-xl text-[#1d1d1f] hover:bg-white/50"
+                  >
+                    <Settings size={18} strokeWidth={1.75} />
+                    Settings
+                  </Button>
+                </Link>
+                <form action={signOut}>
+                  <Button
+                    type="submit"
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12 rounded-xl text-[#1d1d1f] hover:bg-white/50"
+                  >
+                    <LogOut size={18} strokeWidth={1.75} />
+                    Sign out
+                  </Button>
+                </form>
+              </div>
             </motion.div>
           </>
         )}

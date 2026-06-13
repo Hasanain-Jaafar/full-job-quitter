@@ -58,18 +58,18 @@ export function FreedomCalculator({ initialGoal }: FreedomCalculatorProps) {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">
+        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-[#1d1d1f] ">
           Freedom Calculator
         </h1>
-        <p className="text-[#6e6e73] mt-1">
+        <p className="text-[#8a8a8a] mt-1">
           Adjust the numbers to see your path to quitting.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="glass-panel rounded-2xl">
+        <Card className="bg-white rounded-3xl border-none shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold text-[#1d1d1f] dark:text-[#f5f5f7] flex items-center gap-2">
+            <CardTitle className="text-lg font-semibold text-[#1d1d1f]  flex items-center gap-2">
               <Calculator size={18} strokeWidth={1.75} />
               Your inputs
             </CardTitle>
@@ -77,11 +77,11 @@ export function FreedomCalculator({ initialGoal }: FreedomCalculatorProps) {
           <CardContent className="space-y-8">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label className="flex items-center gap-2 text-[#1d1d1f] dark:text-[#f5f5f7]">
+                <Label className="flex items-center gap-2 text-[#1d1d1f] ">
                   <Wallet size={16} strokeWidth={1.75} />
                   Monthly expenses
                 </Label>
-                <span className="text-sm font-medium text-[#0066cc]">
+                <span className="text-sm font-medium text-[#f5c542]">
                   {formatCurrency(monthlyExpenses)}
                 </span>
               </div>
@@ -97,17 +97,17 @@ export function FreedomCalculator({ initialGoal }: FreedomCalculatorProps) {
                 type="number"
                 value={monthlyExpenses}
                 onChange={(e) => setMonthlyExpenses(Number(e.target.value))}
-                className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-white/60 dark:bg-white/5"
+                className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50"
               />
             </div>
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label className="flex items-center gap-2 text-[#1d1d1f] dark:text-[#f5f5f7]">
+                <Label className="flex items-center gap-2 text-[#1d1d1f] ">
                   <TrendingUp size={16} strokeWidth={1.75} />
                   Current savings
                 </Label>
-                <span className="text-sm font-medium text-[#0066cc]">
+                <span className="text-sm font-medium text-[#f5c542]">
                   {formatCurrency(currentSavings)}
                 </span>
               </div>
@@ -123,17 +123,17 @@ export function FreedomCalculator({ initialGoal }: FreedomCalculatorProps) {
                 type="number"
                 value={currentSavings}
                 onChange={(e) => setCurrentSavings(Number(e.target.value))}
-                className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-white/60 dark:bg-white/5"
+                className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50"
               />
             </div>
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label className="flex items-center gap-2 text-[#1d1d1f] dark:text-[#f5f5f7]">
+                <Label className="flex items-center gap-2 text-[#1d1d1f] ">
                   <Calendar size={16} strokeWidth={1.75} />
                   Monthly savings / income
                 </Label>
-                <span className="text-sm font-medium text-[#0066cc]">
+                <span className="text-sm font-medium text-[#f5c542]">
                   {formatCurrency(monthlySavingsRate)}
                 </span>
               </div>
@@ -149,17 +149,17 @@ export function FreedomCalculator({ initialGoal }: FreedomCalculatorProps) {
                 type="number"
                 value={monthlySavingsRate}
                 onChange={(e) => setMonthlySavingsRate(Number(e.target.value))}
-                className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-white/60 dark:bg-white/5"
+                className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50"
               />
             </div>
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label className="flex items-center gap-2 text-[#1d1d1f] dark:text-[#f5f5f7]">
+                <Label className="flex items-center gap-2 text-[#1d1d1f] ">
                   <Target size={16} strokeWidth={1.75} />
                   Target runway
                 </Label>
-                <span className="text-sm font-medium text-[#0066cc]">
+                <span className="text-sm font-medium text-[#f5c542]">
                   {targetRunwayMonths} months
                 </span>
               </div>
@@ -175,14 +175,14 @@ export function FreedomCalculator({ initialGoal }: FreedomCalculatorProps) {
                 type="number"
                 value={targetRunwayMonths}
                 onChange={(e) => setTargetRunwayMonths(Number(e.target.value))}
-                className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-white/60 dark:bg-white/5"
+                className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50"
               />
             </div>
 
             <Button
               onClick={handleSave}
               disabled={isPending}
-              className="w-full h-12 rounded-xl bg-[#0066cc] hover:bg-[#0066cc]/90 text-white"
+              className="w-full h-12 rounded-xl bg-[#1d1d1f] hover:bg-[#1d1d1f]/90 text-white"
             >
               {isPending ? (
                 <Loader2 className="animate-spin" size={18} strokeWidth={1.75} />
@@ -199,40 +199,40 @@ export function FreedomCalculator({ initialGoal }: FreedomCalculatorProps) {
         </Card>
 
         <div className="space-y-5">
-          <Card className="glass-panel rounded-2xl border-l-4 border-l-[#0066cc]">
+          <Card className="bg-white rounded-3xl border-none shadow-sm border-l-4 border-l-[#f5c542]">
             <CardContent className="p-6">
-              <p className="text-sm text-[#6e6e73] mb-1">Required savings</p>
-              <p className="text-4xl font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
+              <p className="text-sm text-[#8a8a8a] mb-1">Required savings</p>
+              <p className="text-4xl font-semibold text-[#1d1d1f] ">
                 {formatCurrency(runway.requiredSavings)}
               </p>
             </CardContent>
           </Card>
 
           <div className="grid grid-cols-2 gap-5">
-            <Card className="glass-panel rounded-2xl">
+            <Card className="bg-white rounded-3xl border-none shadow-sm">
               <CardContent className="p-6">
-                <p className="text-sm text-[#6e6e73] mb-1">Current runway</p>
-                <p className="text-2xl font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
+                <p className="text-sm text-[#8a8a8a] mb-1">Current runway</p>
+                <p className="text-2xl font-semibold text-[#1d1d1f] ">
                   {formatNumber(runway.currentRunwayMonths, 1)} mo
                 </p>
               </CardContent>
             </Card>
-            <Card className="glass-panel rounded-2xl">
+            <Card className="bg-white rounded-3xl border-none shadow-sm">
               <CardContent className="p-6">
-                <p className="text-sm text-[#6e6e73] mb-1">Savings gap</p>
-                <p className="text-2xl font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
+                <p className="text-sm text-[#8a8a8a] mb-1">Savings gap</p>
+                <p className="text-2xl font-semibold text-[#1d1d1f] ">
                   {formatCurrency(Math.max(runway.savingsGap, 0))}
                 </p>
               </CardContent>
             </Card>
           </div>
 
-          <Card className="glass-panel rounded-2xl">
+          <Card className="bg-white rounded-3xl border-none shadow-sm">
             <CardContent className="p-6">
-              <p className="text-sm text-[#6e6e73] mb-1">Projected quit date</p>
-              <p className="text-3xl font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
+              <p className="text-sm text-[#8a8a8a] mb-1">Projected quit date</p>
+              <p className="text-3xl font-semibold text-[#1d1d1f] ">
                 {runway.isFunded
-                  ? "You're funded"
+                  ? "You&apos;re funded"
                   : runway.projectedQuitDate
                   ? runway.projectedQuitDate.toLocaleDateString("en-US", {
                       month: "long",
@@ -241,7 +241,7 @@ export function FreedomCalculator({ initialGoal }: FreedomCalculatorProps) {
                   : "Need positive monthly surplus"}
               </p>
               {!runway.isFunded && runway.projectedMonthsToGoal && (
-                <p className="text-sm text-[#6e6e73] mt-2">
+                <p className="text-sm text-[#8a8a8a] mt-2">
                   About {runway.projectedMonthsToGoal} months away
                 </p>
               )}

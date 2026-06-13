@@ -1,0 +1,646 @@
+"use client"
+
+import { useState, useTransition } from "react"
+import { motion } from "framer-motion"
+import {
+  Wallet,
+  Tag,
+  Receipt,
+  Repeat,
+  Landmark,
+  Plus,
+  Trash2,
+  Loader2,
+  DollarSign,
+} from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { formatCurrency } from "@/lib/calculator/utils"
+import { upsertFinancialGoal } from "@/lib/financial/actions"
+import type { FinancialGoal } from "@/lib/financial/actions"
+import {
+  addCategory,
+  deleteCategory,
+  addExpense,
+  deleteExpense,
+  addSubscription,
+  deleteSubscription,
+  addLoan,
+  deleteLoan,
+} from "@/lib/finances/actions"
+import type {
+  ExpenseCategory,
+  Expense,
+  Subscription,
+  Loan,
+} from "@/lib/finances/actions"
+
+const PRESET_COLORS = [
+  "#0066cc",
+  "#34c759",
+  "#ff9500",
+  "#ff3b30",
+  "#af52de",
+  "#5856d6",
+  "#ff2d55",
+  "#5ac8fa",
+]
+
+interface FinanceManagerProps {
+  goal: FinancialGoal | null
+  categories: ExpenseCategory[]
+  expenses: Expense[]
+  subscriptions: Subscription[]
+  loans: Loan[]
+}
+
+export function FinanceManager({
+  goal,
+  categories,
+  expenses,
+  subscriptions,
+  loans,
+}: FinanceManagerProps) {
+  const [isPending, startTransition] = useTransition()
+  const [activeTab, setActiveTab] = useState("income")
+
+  // Income form
+  const [monthlyIncome, setMonthlyIncome] = useState(
+    Number(goal?.monthly_income) || 0
+  )
+
+  // Category form
+  const [categoryName, setCategoryName] = useState("")
+  const [categoryColor, setCategoryColor] = useState(PRESET_COLORS[0])
+  const [categoryBudget, setCategoryBudget] = useState("")
+
+  // Expense form
+  const [expenseName, setExpenseName] = useState("")
+  const [expenseAmount, setExpenseAmount] = useState("")
+  const [expenseCategory, setExpenseCategory] = useState("")
+  const [expenseDate, setExpenseDate] = useState(
+    new Date().toISOString().split("T")[0]
+  )
+  const [expenseRecurring, setExpenseRecurring] = useState(false)
+
+  // Subscription form
+  const [subName, setSubName] = useState("")
+  const [subAmount, setSubAmount] = useState("")
+  const [subFrequency, setSubFrequency] = useState<"monthly" | "yearly">("monthly")
+  const [subDueDate, setSubDueDate] = useState("")
+
+  // Loan form
+  const [loanName, setLoanName] = useState("")
+  const [loanTotal, setLoanTotal] = useState("")
+  const [loanRemaining, setLoanRemaining] = useState("")
+  const [loanPayment, setLoanPayment] = useState("")
+  const [loanRate, setLoanRate] = useState("")
+  const [loanDueDate, setLoanDueDate] = useState("")
+
+  function handleSaveIncome() {
+    startTransition(async () => {
+      await upsertFinancialGoal({ monthly_income: monthlyIncome })
+    })
+  }
+
+  function handleAddCategory(e: React.FormEvent) {
+    e.preventDefault()
+    if (!categoryName.trim()) return
+    startTransition(async () => {
+      await addCategory({
+        name: categoryName,
+        color: categoryColor,
+        budget_limit: Number(categoryBudget) || 0,
+      })
+      setCategoryName("")
+      setCategoryBudget("")
+    })
+  }
+
+  function handleAddExpense(e: React.FormEvent) {
+    e.preventDefault()
+    if (!expenseName.trim() || !expenseAmount) return
+    startTransition(async () => {
+      await addExpense({
+        category_id: expenseCategory || null,
+        name: expenseName,
+        amount: Number(expenseAmount),
+        expense_date: expenseDate,
+        is_recurring: expenseRecurring,
+      })
+      setExpenseName("")
+      setExpenseAmount("")
+      setExpenseRecurring(false)
+    })
+  }
+
+  function handleAddSubscription(e: React.FormEvent) {
+    e.preventDefault()
+    if (!subName.trim() || !subAmount) return
+    startTransition(async () => {
+      await addSubscription({
+        name: subName,
+        amount: Number(subAmount),
+        frequency: subFrequency,
+        next_due_date: subDueDate,
+      })
+      setSubName("")
+      setSubAmount("")
+      setSubDueDate("")
+    })
+  }
+
+  function handleAddLoan(e: React.FormEvent) {
+    e.preventDefault()
+    if (!loanName.trim() || !loanTotal) return
+    startTransition(async () => {
+      await addLoan({
+        name: loanName,
+        total_amount: Number(loanTotal),
+        remaining_amount: Number(loanRemaining) || 0,
+        monthly_payment: Number(loanPayment) || 0,
+        interest_rate: Number(loanRate) || 0,
+        due_date: loanDueDate,
+      })
+      setLoanName("")
+      setLoanTotal("")
+      setLoanRemaining("")
+      setLoanPayment("")
+      setLoanRate("")
+      setLoanDueDate("")
+    })
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-[#1d1d1f]">
+          Finances
+        </h1>
+        <p className="text-[#8a8a8a] mt-1">
+          Manage your income, expenses, subscriptions, and loans.
+        </p>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="bg-white/60 p-1 rounded-2xl h-auto flex flex-wrap gap-1">
+          <TabsTrigger
+            value="income"
+            className="rounded-xl px-4 py-2 data-[state=active]:bg-[#1d1d1f] data-[state=active]:text-white"
+          >
+            <DollarSign size={16} strokeWidth={1.75} className="mr-2" />
+            Income
+          </TabsTrigger>
+          <TabsTrigger
+            value="categories"
+            className="rounded-xl px-4 py-2 data-[state=active]:bg-[#1d1d1f] data-[state=active]:text-white"
+          >
+            <Tag size={16} strokeWidth={1.75} className="mr-2" />
+            Categories
+          </TabsTrigger>
+          <TabsTrigger
+            value="expenses"
+            className="rounded-xl px-4 py-2 data-[state=active]:bg-[#1d1d1f] data-[state=active]:text-white"
+          >
+            <Receipt size={16} strokeWidth={1.75} className="mr-2" />
+            Expenses
+          </TabsTrigger>
+          <TabsTrigger
+            value="subscriptions"
+            className="rounded-xl px-4 py-2 data-[state=active]:bg-[#1d1d1f] data-[state=active]:text-white"
+          >
+            <Repeat size={16} strokeWidth={1.75} className="mr-2" />
+            Subscriptions
+          </TabsTrigger>
+          <TabsTrigger
+            value="loans"
+            className="rounded-xl px-4 py-2 data-[state=active]:bg-[#1d1d1f] data-[state=active]:text-white"
+          >
+            <Landmark size={16} strokeWidth={1.75} className="mr-2" />
+            Loans
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="income" className="mt-6">
+          <Card className="bg-white rounded-3xl border-none shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-[#1d1d1f] flex items-center gap-2">
+                <Wallet size={18} strokeWidth={1.75} />
+                Monthly Income
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-[#1d1d1f]">Your main monthly income</Label>
+                <Input
+                  type="number"
+                  value={monthlyIncome}
+                  onChange={(e) => setMonthlyIncome(Number(e.target.value))}
+                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50"
+                />
+              </div>
+              <Button
+                onClick={handleSaveIncome}
+                disabled={isPending}
+                className="rounded-xl bg-[#f5c542] hover:bg-[#f5c542]/90 text-[#1d1d1f] font-medium"
+              >
+                {isPending ? (
+                  <Loader2 className="animate-spin" size={18} strokeWidth={1.75} />
+                ) : (
+                  "Save income"
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="categories" className="mt-6 space-y-4">
+          <Card className="bg-white rounded-3xl border-none shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-[#1d1d1f]">
+                Add category
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleAddCategory} className="flex flex-col md:flex-row gap-3">
+                <Input
+                  placeholder="Category name"
+                  value={categoryName}
+                  onChange={(e) => setCategoryName(e.target.value)}
+                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 flex-1"
+                />
+                <Input
+                  type="number"
+                  placeholder="Budget limit"
+                  value={categoryBudget}
+                  onChange={(e) => setCategoryBudget(e.target.value)}
+                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-40"
+                />
+                <Select value={categoryColor} onValueChange={setCategoryColor}>
+                  <SelectTrigger className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 w-full md:w-48">
+                    <SelectValue placeholder="Color" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    {PRESET_COLORS.map((color) => (
+                      <SelectItem key={color} value={color}>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-4 h-4 rounded-full"
+                            style={{ background: color }}
+                          />
+                          {color}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="submit"
+                  disabled={isPending || !categoryName.trim()}
+                  className="h-12 rounded-xl bg-[#1d1d1f] hover:bg-[#1d1d1f]/90 text-white px-6"
+                >
+                  <Plus size={18} strokeWidth={1.75} className="mr-2" />
+                  Add
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {categories.map((category) => (
+              <motion.div
+                key={category.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <Card className="bg-white rounded-3xl border-none shadow-sm">
+                  <CardContent className="p-5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-4 h-10 rounded-full"
+                        style={{ background: category.color }}
+                      />
+                      <div>
+                        <p className="font-semibold text-[#1d1d1f]">{category.name}</p>
+                        <p className="text-sm text-[#8a8a8a]">
+                          Budget: {formatCurrency(Number(category.budget_limit))}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => startTransition(async () => { await deleteCategory(category.id) })}
+                      className="rounded-xl text-[#8a8a8a] hover:text-[#ff3b30]"
+                    >
+                      <Trash2 size={16} strokeWidth={1.75} />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="expenses" className="mt-6 space-y-4">
+          <Card className="bg-white rounded-3xl border-none shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-[#1d1d1f]">
+                Add expense
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleAddExpense} className="flex flex-col md:flex-row gap-3 flex-wrap">
+                <Input
+                  placeholder="Expense name"
+                  value={expenseName}
+                  onChange={(e) => setExpenseName(e.target.value)}
+                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 flex-1 min-w-[200px]"
+                />
+                <Input
+                  type="number"
+                  placeholder="Amount"
+                  value={expenseAmount}
+                  onChange={(e) => setExpenseAmount(e.target.value)}
+                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-32"
+                />
+                <Select value={expenseCategory} onValueChange={setExpenseCategory}>
+                  <SelectTrigger className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-48">
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  type="date"
+                  value={expenseDate}
+                  onChange={(e) => setExpenseDate(e.target.value)}
+                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-44"
+                />
+                <label className="flex items-center gap-2 h-12 px-3">
+                  <input
+                    type="checkbox"
+                    checked={expenseRecurring}
+                    onChange={(e) => setExpenseRecurring(e.target.checked)}
+                    className="size-4 rounded border-gray-300"
+                  />
+                  <span className="text-sm text-[#1d1d1f]">Recurring</span>
+                </label>
+                <Button
+                  type="submit"
+                  disabled={isPending || !expenseName.trim() || !expenseAmount}
+                  className="h-12 rounded-xl bg-[#1d1d1f] hover:bg-[#1d1d1f]/90 text-white px-6"
+                >
+                  <Plus size={18} strokeWidth={1.75} className="mr-2" />
+                  Add
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-3">
+            {expenses.map((expense) => {
+              const category = categories.find((c) => c.id === expense.category_id)
+              return (
+                <motion.div
+                  key={expense.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <Card className="bg-white rounded-3xl border-none shadow-sm">
+                    <CardContent className="p-5 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-3 h-10 rounded-full"
+                          style={{ background: category?.color ?? "#8a8a8a" }}
+                        />
+                        <div>
+                          <p className="font-semibold text-[#1d1d1f]">{expense.name}</p>
+                          <p className="text-sm text-[#8a8a8a]">
+                            {category?.name ?? "Uncategorized"} • {expense.expense_date}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="font-semibold text-[#1d1d1f]">
+                          {formatCurrency(Number(expense.amount))}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => startTransition(async () => { await deleteExpense(expense.id) })}
+                          className="rounded-xl text-[#8a8a8a] hover:text-[#ff3b30]"
+                        >
+                          <Trash2 size={16} strokeWidth={1.75} />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )
+            })}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="subscriptions" className="mt-6 space-y-4">
+          <Card className="bg-white rounded-3xl border-none shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-[#1d1d1f]">
+                Add subscription
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleAddSubscription} className="flex flex-col md:flex-row gap-3">
+                <Input
+                  placeholder="Subscription name"
+                  value={subName}
+                  onChange={(e) => setSubName(e.target.value)}
+                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 flex-1"
+                />
+                <Input
+                  type="number"
+                  placeholder="Amount"
+                  value={subAmount}
+                  onChange={(e) => setSubAmount(e.target.value)}
+                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-32"
+                />
+                <Select value={subFrequency} onValueChange={(v) => setSubFrequency(v as "monthly" | "yearly")}>
+                  <SelectTrigger className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input
+                  type="date"
+                  placeholder="Next due date"
+                  value={subDueDate}
+                  onChange={(e) => setSubDueDate(e.target.value)}
+                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-44"
+                />
+                <Button
+                  type="submit"
+                  disabled={isPending || !subName.trim() || !subAmount}
+                  className="h-12 rounded-xl bg-[#1d1d1f] hover:bg-[#1d1d1f]/90 text-white px-6"
+                >
+                  <Plus size={18} strokeWidth={1.75} className="mr-2" />
+                  Add
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-3">
+            {subscriptions.map((sub) => (
+              <motion.div
+                key={sub.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <Card className="bg-white rounded-3xl border-none shadow-sm">
+                  <CardContent className="p-5 flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-[#1d1d1f]">{sub.name}</p>
+                      <p className="text-sm text-[#8a8a8a]">
+                        {sub.frequency} • Next due: {sub.next_due_date ?? "—"}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="font-semibold text-[#1d1d1f]">
+                        {formatCurrency(Number(sub.amount))}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => startTransition(async () => { await deleteSubscription(sub.id) })}
+                        className="rounded-xl text-[#8a8a8a] hover:text-[#ff3b30]"
+                      >
+                        <Trash2 size={16} strokeWidth={1.75} />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="loans" className="mt-6 space-y-4">
+          <Card className="bg-white rounded-3xl border-none shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-[#1d1d1f]">
+                Add loan
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleAddLoan} className="flex flex-col md:flex-row gap-3 flex-wrap">
+                <Input
+                  placeholder="Loan name"
+                  value={loanName}
+                  onChange={(e) => setLoanName(e.target.value)}
+                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 flex-1 min-w-[200px]"
+                />
+                <Input
+                  type="number"
+                  placeholder="Total amount"
+                  value={loanTotal}
+                  onChange={(e) => setLoanTotal(e.target.value)}
+                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-36"
+                />
+                <Input
+                  type="number"
+                  placeholder="Remaining"
+                  value={loanRemaining}
+                  onChange={(e) => setLoanRemaining(e.target.value)}
+                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-36"
+                />
+                <Input
+                  type="number"
+                  placeholder="Monthly payment"
+                  value={loanPayment}
+                  onChange={(e) => setLoanPayment(e.target.value)}
+                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-36"
+                />
+                <Input
+                  type="number"
+                  step="0.01"
+                  placeholder="Interest %"
+                  value={loanRate}
+                  onChange={(e) => setLoanRate(e.target.value)}
+                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-32"
+                />
+                <Input
+                  type="date"
+                  value={loanDueDate}
+                  onChange={(e) => setLoanDueDate(e.target.value)}
+                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-44"
+                />
+                <Button
+                  type="submit"
+                  disabled={isPending || !loanName.trim() || !loanTotal}
+                  className="h-12 rounded-xl bg-[#1d1d1f] hover:bg-[#1d1d1f]/90 text-white px-6"
+                >
+                  <Plus size={18} strokeWidth={1.75} className="mr-2" />
+                  Add
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-3">
+            {loans.map((loan) => (
+              <motion.div
+                key={loan.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <Card className="bg-white rounded-3xl border-none shadow-sm">
+                  <CardContent className="p-5 flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-[#1d1d1f]">{loan.name}</p>
+                      <p className="text-sm text-[#8a8a8a]">
+                        {formatCurrency(Number(loan.remaining_amount))} remaining •{" "}
+                        {loan.interest_rate}% interest
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="font-semibold text-[#1d1d1f]">
+                        {formatCurrency(Number(loan.monthly_payment))}/mo
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => startTransition(async () => { await deleteLoan(loan.id) })}
+                        className="rounded-xl text-[#8a8a8a] hover:text-[#ff3b30]"
+                      >
+                        <Trash2 size={16} strokeWidth={1.75} />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}

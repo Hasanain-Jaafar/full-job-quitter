@@ -2,7 +2,7 @@ import { AuthForm } from "@/components/auth/auth-form"
 
 export default function SignUpPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center p-6 bg-[#f5f5f7] dark:bg-black">
+    <main className="min-h-screen flex items-center justify-center p-6 bg-[#f8f1de]">
       <AuthForm defaultMode="sign-up" />
     </main>
   )

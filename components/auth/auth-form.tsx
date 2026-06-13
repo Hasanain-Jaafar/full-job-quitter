@@ -115,16 +115,16 @@ export function AuthForm({ defaultMode = "sign-in" }: AuthFormProps) {
       transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
       className="w-full max-w-md"
     >
-      <Card className="glass-panel border-white/20 shadow-2xl rounded-2xl overflow-hidden">
+      <Card className="bg-white shadow-sm rounded-2xl overflow-hidden">
         <CardHeader className="space-y-1 text-center p-8">
-          <CardTitle className="text-2xl font-semibold tracking-tight text-[#1d1d1f] dark:text-[#f5f5f7]">
+          <CardTitle className="text-2xl font-semibold tracking-tight text-[#1d1d1f] ">
             {isSignUp
               ? "Create your account"
               : isMagicLink
               ? "Magic link sign in"
               : "Welcome back"}
           </CardTitle>
-          <CardDescription className="text-[#6e6e73]">
+          <CardDescription className="text-[#8a8a8a]">
             {isSignUp
               ? "Start planning your exit today."
               : isMagicLink
@@ -144,12 +144,12 @@ export function AuthForm({ defaultMode = "sign-in" }: AuthFormProps) {
                   exit={{ opacity: 0, height: 0 }}
                   className="space-y-2"
                 >
-                  <Label htmlFor="fullName" className="text-[#1d1d1f] dark:text-[#f5f5f7]">
+                  <Label htmlFor="fullName" className="text-[#1d1d1f] ">
                     Full name
                   </Label>
                   <div className="relative">
                     <User
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6e6e73]"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8a8a8a]"
                       size={18}
                       strokeWidth={1.75}
                     />
@@ -178,12 +178,12 @@ export function AuthForm({ defaultMode = "sign-in" }: AuthFormProps) {
             </AnimatePresence>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-[#1d1d1f] dark:text-[#f5f5f7]">
+              <Label htmlFor="email" className="text-[#1d1d1f] ">
                 Email
               </Label>
               <div className="relative">
                 <Mail
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6e6e73]"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8a8a8a]"
                   size={18}
                   strokeWidth={1.75}
                 />
@@ -211,12 +211,12 @@ export function AuthForm({ defaultMode = "sign-in" }: AuthFormProps) {
 
             {!isMagicLink && (
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-[#1d1d1f] dark:text-[#f5f5f7]">
+                <Label htmlFor="password" className="text-[#1d1d1f] ">
                   Password
                 </Label>
                 <div className="relative">
                   <Lock
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6e6e73]"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8a8a8a]"
                     size={18}
                     strokeWidth={1.75}
                   />
@@ -266,7 +266,7 @@ export function AuthForm({ defaultMode = "sign-in" }: AuthFormProps) {
             <Button
               type="submit"
               disabled={isPending}
-              className="w-full h-12 rounded-xl bg-[#0066cc] hover:bg-[#0066cc]/90 text-white font-medium"
+              className="w-full h-12 rounded-xl bg-[#1d1d1f] hover:bg-[#1d1d1f]/90 text-white font-medium"
             >
               {isPending ? (
                 <Loader2 className="animate-spin" size={20} strokeWidth={1.75} />
@@ -283,14 +283,14 @@ export function AuthForm({ defaultMode = "sign-in" }: AuthFormProps) {
         </CardContent>
 
         <CardFooter className="flex flex-col gap-3 p-8 pt-0">
-          <div className="text-sm text-[#6e6e73]">
+          <div className="text-sm text-[#8a8a8a]">
             {isSignUp ? (
               <>
                 Already have an account?{" "}
                 <button
                   type="button"
                   onClick={() => setMode("sign-in")}
-                  className="text-[#0066cc] hover:underline font-medium"
+                  className="text-[#f5c542] hover:underline font-medium"
                 >
                   Sign in
                 </button>
@@ -301,7 +301,7 @@ export function AuthForm({ defaultMode = "sign-in" }: AuthFormProps) {
                 <button
                   type="button"
                   onClick={() => setMode("sign-in")}
-                  className="text-[#0066cc] hover:underline font-medium"
+                  className="text-[#f5c542] hover:underline font-medium"
                 >
                   Sign in with password
                 </button>
@@ -312,7 +312,7 @@ export function AuthForm({ defaultMode = "sign-in" }: AuthFormProps) {
                 <button
                   type="button"
                   onClick={() => setMode("sign-up")}
-                  className="text-[#0066cc] hover:underline font-medium"
+                  className="text-[#f5c542] hover:underline font-medium"
                 >
                   Sign up
                 </button>
@@ -324,7 +324,7 @@ export function AuthForm({ defaultMode = "sign-in" }: AuthFormProps) {
             <button
               type="button"
               onClick={() => setMode("magic-link")}
-              className="text-sm text-[#6e6e73] hover:text-[#0066cc] transition-colors"
+              className="text-sm text-[#8a8a8a] hover:text-[#f5c542] transition-colors"
             >
               Sign in with magic link
             </button>
