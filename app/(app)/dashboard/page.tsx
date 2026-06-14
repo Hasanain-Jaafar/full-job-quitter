@@ -247,7 +247,7 @@ export default async function DashboardPage() {
         {/* Projected quit date — hero card */}
         <Card size={compact ? "compact" : "default"} className="lg:col-span-3 bg-white rounded-3xl border-none shadow-sm">
           <CardContent className={`h-full flex flex-col justify-center ${compact ? "p-5" : "p-8"}`}>
-            <div className="flex items-start justify-between mb-2">
+            <div className="mb-2">
               <p className={`text-[#8a8a8a] ${compact ? "text-xs" : "text-sm"}`}>Projected quit date</p>
               <LastUpdated date={goalUpdatedAt} />
             </div>

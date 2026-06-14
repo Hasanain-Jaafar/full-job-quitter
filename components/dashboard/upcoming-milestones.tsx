@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { ArrowRight, Circle } from "lucide-react"
 import { motion } from "framer-motion"
+import { Button } from "@/components/ui/button"
 import type { Milestone } from "@/lib/milestones/actions"
 
 interface UpcomingMilestonesProps {
@@ -16,10 +17,26 @@ export function UpcomingMilestones({ milestones, compact = false }: UpcomingMile
     .sort((a, b) => a.order_index - b.order_index)
     .slice(0, 3)
 
+  const hasMilestones = milestones.length > 0
+
   return (
     <div className="flex flex-col h-full">
       <div className={`flex-1 ${compact ? "space-y-2" : "space-y-3"}`}>
-        {upcoming.length === 0 ? (
+        {!hasMilestones ? (
+          <div className="flex flex-col items-start">
+            <p className={`text-[#8a8a8a] mb-3 ${compact ? "text-xs" : "text-sm"}`}>
+              No milestones set yet
+            </p>
+            <Link href="/milestones">
+              <Button
+                variant="outline"
+                className={`rounded-xl border-[#e8e0cc] bg-white hover:bg-[#f8f1de] text-[#1d1d1f] ${compact ? "h-8 text-xs" : "h-10"}`}
+              >
+                Set up milestones
+              </Button>
+            </Link>
+          </div>
+        ) : upcoming.length === 0 ? (
           <p className="text-sm text-[#34c759] font-medium">
             All milestones complete! You&apos;re ready.
           </p>
@@ -52,15 +69,17 @@ export function UpcomingMilestones({ milestones, compact = false }: UpcomingMile
         )}
       </div>
 
-      <Link
-        href="/milestones"
-        className={`inline-flex items-center text-[#f5c542] hover:text-[#1d1d1f] transition-colors ${
-          compact ? "text-xs mt-3" : "text-sm mt-4"
-        } font-medium`}
-      >
-        View all
-        <ArrowRight size={compact ? 12 : 14} strokeWidth={2} className="ml-1" />
-      </Link>
+      {hasMilestones && (
+        <Link
+          href="/milestones"
+          className={`inline-flex items-center text-[#f5c542] hover:text-[#1d1d1f] transition-colors ${
+            compact ? "text-xs mt-3" : "text-sm mt-4"
+          } font-medium`}
+        >
+          View all
+          <ArrowRight size={compact ? 12 : 14} strokeWidth={2} className="ml-1" />
+        </Link>
+      )}
     </div>
   )
 }

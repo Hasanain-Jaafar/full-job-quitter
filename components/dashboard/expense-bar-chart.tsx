@@ -36,7 +36,7 @@ export function ExpenseBarChart({ categories, expensesByCategory, compact = fals
               className={`rounded-xl border-[#e8e0cc] bg-white hover:bg-[#f8f1de] text-[#1d1d1f] ${compact ? "h-8 text-xs" : "h-10"}`}
             >
               <Plus size={compact ? 14 : 16} strokeWidth={1.75} className="mr-1.5" />
-              Add your first expense
+              Add your first category
             </Button>
           </Link>
         </div>

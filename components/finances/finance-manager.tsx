@@ -49,6 +49,26 @@ import type {
   Loan,
 } from "@/lib/finances/actions"
 
+function EmptyState({
+  icon: Icon,
+  title,
+  children,
+}: {
+  icon: React.ElementType
+  title: string
+  children?: React.ReactNode
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center text-center py-12 px-6 bg-white rounded-3xl border-none shadow-sm">
+      <div className="w-14 h-14 rounded-2xl bg-[#f8f1de] flex items-center justify-center mb-4">
+        <Icon size={28} strokeWidth={1.75} className="text-[#f5c542]" />
+      </div>
+      <h3 className="text-lg font-semibold text-[#1d1d1f] mb-2">{title}</h3>
+      {children && <p className="text-sm text-[#8a8a8a] max-w-sm">{children}</p>}
+    </div>
+  )
+}
+
 const PRESET_COLORS = [
   "#0066cc",
   "#34c759",
@@ -258,7 +278,12 @@ export function FinanceManager({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="income" className="mt-6">
+        <TabsContent value="income" className="mt-6 space-y-4">
+          {monthlyIncome === 0 && (
+            <EmptyState icon={Wallet} title="Start tracking your income">
+              Add your main monthly income so the dashboard can project your quit date.
+            </EmptyState>
+          )}
           <Card className="bg-white rounded-3xl border-none shadow-sm">
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-[#1d1d1f] flex items-center gap-2">
@@ -340,6 +365,12 @@ export function FinanceManager({
               </form>
             </CardContent>
           </Card>
+
+          {categories.length === 0 && (
+            <EmptyState icon={Tag} title="Start tracking your categories">
+              Create categories like Rent, Food, and Subscriptions to organize your spending.
+            </EmptyState>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {categories.map((category) => (
@@ -437,6 +468,12 @@ export function FinanceManager({
             </CardContent>
           </Card>
 
+          {expenses.length === 0 && (
+            <EmptyState icon={Receipt} title="Start tracking your expenses">
+              Record your first expense to see where your money goes each month.
+            </EmptyState>
+          )}
+
           <div className="space-y-3">
             {expenses.map((expense) => {
               const category = categories.find((c) => c.id === expense.category_id)
@@ -529,6 +566,12 @@ export function FinanceManager({
               </form>
             </CardContent>
           </Card>
+
+          {subscriptions.length === 0 && (
+            <EmptyState icon={Repeat} title="Start tracking your subscriptions">
+              Add recurring payments like Netflix, gym, or software subscriptions.
+            </EmptyState>
+          )}
 
           <div className="space-y-3">
             {subscriptions.map((sub) => (
@@ -623,6 +666,12 @@ export function FinanceManager({
               </form>
             </CardContent>
           </Card>
+
+          {loans.length === 0 && (
+            <EmptyState icon={Landmark} title="Start tracking your loans">
+              Add any loans or debt so you can see your total monthly obligations.
+            </EmptyState>
+          )}
 
           <div className="space-y-3">
             {loans.map((loan) => (
