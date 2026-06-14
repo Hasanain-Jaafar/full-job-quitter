@@ -203,7 +203,7 @@ export function MilestoneList({ milestones }: MilestoneListProps) {
           value={category}
           onValueChange={(value) => setCategory(value as Milestone["category"])}
         >
-          <SelectTrigger className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-white/60 dark:bg-white/5 w-full md:w-40">
+          <SelectTrigger className="h-12 min-h-12 py-0 rounded-xl border-[rgba(0,0,0,0.08)] bg-white/60 dark:bg-white/5 w-full md:w-40">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent>

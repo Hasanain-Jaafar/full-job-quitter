@@ -19,49 +19,70 @@ export function MilestoneTimeline({ milestones, compact = false }: MilestoneTime
   return (
     <div className="space-y-4">
       {/* Timeline */}
-      <div className="relative flex items-center justify-between">
-        {/* Connecting line */}
-        <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-0.5 bg-[#e8e0cc] rounded-full" />
+      <div className="relative">
+        <div className="relative flex items-center justify-between">
+          {/* Connecting line */}
+          <div className="absolute left-0 right-0 top-[18px] h-0.5 bg-[#e8e0cc] rounded-full" />
 
-        {display.map((milestone, index) => {
-          const isCompleted = milestone.status === "completed"
-          const isCurrent = index === currentIndex
+          {display.map((milestone, index) => {
+            const isCompleted = milestone.status === "completed"
+            const isCurrent = index === currentIndex
 
-          return (
-            <div key={milestone.id} className="relative z-10 flex flex-col items-center">
-              {isCompleted ? (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className={`rounded-full bg-[#34c759] text-white flex items-center justify-center border-2 border-white shadow-sm ${
-                    compact ? "w-7 h-7" : "w-9 h-9"
-                  }`}
-                >
-                  <Check size={compact ? 14 : 16} strokeWidth={2.5} />
-                </motion.div>
-              ) : isCurrent ? (
-                <div className="relative">
-                  <span className="absolute inset-0 rounded-full bg-[#f5c542] animate-ping opacity-40" />
+            return (
+              <div key={milestone.id} className="relative z-10 flex flex-col items-center w-0 flex-1">
+                {isCompleted ? (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className={`rounded-full bg-[#34c759] text-white flex items-center justify-center border-2 border-white shadow-sm ${
+                      compact ? "w-7 h-7" : "w-9 h-9"
+                    }`}
+                  >
+                    <Check size={compact ? 14 : 16} strokeWidth={2.5} />
+                  </motion.div>
+                ) : isCurrent ? (
+                  <div className="relative">
+                    <span className="absolute inset-0 rounded-full bg-[#f5c542] animate-ping opacity-40" />
+                    <div
+                      className={`relative rounded-full bg-[#f5c542] text-[#1d1d1f] flex items-center justify-center border-2 border-white shadow-sm ${
+                        compact ? "w-7 h-7 text-xs" : "w-9 h-9 text-sm"
+                      } font-semibold`}
+                    >
+                      {index + 1}
+                    </div>
+                  </div>
+                ) : (
                   <div
-                    className={`relative rounded-full bg-[#f5c542] text-[#1d1d1f] flex items-center justify-center border-2 border-white shadow-sm ${
+                    className={`rounded-full border-2 border-[#e8e0cc] bg-white flex items-center justify-center text-[#8a8a8a] ${
                       compact ? "w-7 h-7 text-xs" : "w-9 h-9 text-sm"
-                    } font-semibold`}
+                    } font-medium`}
                   >
                     {index + 1}
                   </div>
-                </div>
-              ) : (
-                <div
-                  className={`rounded-full border-2 border-[#e8e0cc] bg-white flex items-center justify-center text-[#8a8a8a] ${
-                    compact ? "w-7 h-7 text-xs" : "w-9 h-9 text-sm"
-                  } font-medium`}
-                >
-                  {index + 1}
-                </div>
-              )}
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Labels below dots */}
+        <div className="flex justify-between mt-2">
+          {display.map((milestone) => (
+            <div
+              key={`label-${milestone.id}`}
+              className="flex-1 text-center px-0.5"
+            >
+              <p
+                className={`text-[10px] leading-tight text-[#8a8a8a] ${
+                  milestone.status === "completed" ? "line-through opacity-60" : ""
+                }`}
+                title={milestone.title}
+              >
+                {milestone.title}
+              </p>
             </div>
-          )
-        })}
+          ))}
+        </div>
       </div>
 
       {/* Progress label */}
@@ -72,7 +93,7 @@ export function MilestoneTimeline({ milestones, compact = false }: MilestoneTime
             {completedCount} of {display.length} completed
           </span>
         </div>
-        <div className="h-2 bg-[#f8f1de] rounded-full overflow-hidden">
+        <div className="h-1.5 bg-[#f8f1de] rounded-full overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}

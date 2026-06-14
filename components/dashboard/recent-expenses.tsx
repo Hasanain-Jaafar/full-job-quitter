@@ -29,7 +29,7 @@ export function RecentExpenses({ expenses, categories, compact = false }: Recent
               className={`rounded-xl border-[#e8e0cc] bg-white hover:bg-[#f8f1de] text-[#1d1d1f] ${compact ? "h-8 text-xs" : "h-10"}`}
             >
               <Plus size={compact ? 14 : 16} strokeWidth={1.75} className="mr-1.5" />
-              Record an expense
+              Record your first expense
             </Button>
           </Link>
         </div>

@@ -8,6 +8,7 @@ import {
   Route,
   Receipt,
   TrendingUp,
+  Plus,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -268,29 +269,9 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* Expense breakdown + milestone timeline + upcoming milestones */}
+      {/* Milestone timeline + checklist */}
       <div className={`grid grid-cols-1 lg:grid-cols-12 ${compact ? "gap-3" : "gap-5"}`}>
-        <Card size={compact ? "compact" : "default"} className="lg:col-span-4 bg-white rounded-3xl border-none shadow-sm">
-          <CardHeader className={`flex flex-row items-center justify-between ${compact ? "pb-2" : ""}`}>
-            <CardTitle className={`font-semibold text-[#1d1d1f] flex items-center gap-2 ${compact ? "text-base" : "text-lg"}`}>
-              <Receipt size={compact ? 16 : 18} strokeWidth={1.75} />
-              Expense breakdown
-            </CardTitle>
-            <div className="flex items-center gap-2">
-              <LastUpdated date={expenseUpdatedAt} />
-              <Link href="/finances">
-                <Button variant="ghost" className={`rounded-xl text-[#8a8a8a] ${compact ? "h-8 text-sm" : ""}`}>
-                  Manage
-                </Button>
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent className={compact ? "pt-2" : ""}>
-            <ExpenseBarChart categories={categories} expensesByCategory={expensesByCategory} compact={compact} />
-          </CardContent>
-        </Card>
-
-        <Card size={compact ? "compact" : "default"} className="lg:col-span-4 bg-white rounded-3xl border-none shadow-sm">
+        <Card size={compact ? "compact" : "default"} className="lg:col-span-8 bg-white rounded-3xl border-none shadow-sm">
           <CardHeader className={`flex flex-row items-center justify-between ${compact ? "pb-2" : ""}`}>
             <CardTitle className={`font-semibold text-[#1d1d1f] flex items-center gap-2 ${compact ? "text-base" : "text-lg"}`}>
               <Target size={compact ? 16 : 18} strokeWidth={1.75} />
@@ -307,7 +288,7 @@ export default async function DashboardPage() {
           <CardHeader className={`flex flex-row items-center justify-between ${compact ? "pb-2" : ""}`}>
             <CardTitle className={`font-semibold text-[#1d1d1f] flex items-center gap-2 ${compact ? "text-base" : "text-lg"}`}>
               <Route size={compact ? 16 : 18} strokeWidth={1.75} />
-              Next milestones
+              Up next
             </CardTitle>
             <LastUpdated date={milestoneUpdatedAt} />
           </CardHeader>
@@ -316,6 +297,27 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Expense breakdown */}
+      <Card size={compact ? "compact" : "default"} className="bg-white rounded-3xl border-none shadow-sm">
+        <CardHeader className={`flex flex-row items-center justify-between ${compact ? "pb-2" : ""}`}>
+          <CardTitle className={`font-semibold text-[#1d1d1f] flex items-center gap-2 ${compact ? "text-base" : "text-lg"}`}>
+            <Receipt size={compact ? 16 : 18} strokeWidth={1.75} />
+            Expense breakdown
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            <LastUpdated date={expenseUpdatedAt} />
+            <Link href="/finances">
+              <Button variant="ghost" className={`rounded-xl text-[#8a8a8a] ${compact ? "h-8 text-sm" : ""}`}>
+                Manage
+              </Button>
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent className={compact ? "pt-2" : ""}>
+          <ExpenseBarChart categories={categories} expensesByCategory={expensesByCategory} compact={compact} />
+        </CardContent>
+      </Card>
 
       {/* Subscriptions/loans + recent expenses + target details */}
       <div className={`grid grid-cols-1 lg:grid-cols-12 ${compact ? "gap-3" : "gap-5"}`}>
@@ -331,7 +333,20 @@ export default async function DashboardPage() {
               <TrendingDown size={compact ? 16 : 18} strokeWidth={1.75} />
               Recent expenses
             </CardTitle>
-            <LastUpdated date={expenseUpdatedAt} />
+            <div className="flex items-center gap-2">
+              <LastUpdated date={expenseUpdatedAt} />
+              {expenses.length > 0 && (
+                <Link href="/finances?tab=expenses">
+                  <Button
+                    variant="outline"
+                    className={`rounded-xl border-[#e8e0cc] bg-white hover:bg-[#f8f1de] text-[#1d1d1f] ${compact ? "h-8 text-xs" : "h-9"}`}
+                  >
+                    <Plus size={compact ? 14 : 16} strokeWidth={1.75} className="mr-1.5" />
+                    Add expense
+                  </Button>
+                </Link>
+              )}
+            </div>
           </CardHeader>
           <CardContent className={compact ? "pt-2" : ""}>
             <RecentExpenses expenses={expenses} categories={categories} compact={compact} />
@@ -405,31 +420,43 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${compact ? "gap-3" : "gap-4"}`}>
-              {milestones.map((milestone) => (
-                <div
-                  key={milestone.id}
-                  className={`rounded-2xl border-l-4 ${
-                    milestone.status === "completed"
-                      ? "bg-[#34c759]/5 border-[#34c759]"
-                      : "bg-[#f8f1de] border-[#f5c542]"
-                  } ${compact ? "p-3" : "p-4"}`}
-                >
-                  <p
-                    className={`font-medium ${
-                      milestone.status === "completed"
-                        ? "text-[#8a8a8a] line-through"
-                        : "text-[#1d1d1f]"
-                    } ${compact ? "text-sm" : ""}`}
-                  >
-                    {milestone.title}
-                  </p>
-                  {milestone.description && (
-                    <p className={`text-[#8a8a8a] mt-1 ${compact ? "text-[10px]" : "text-xs"}`}>
-                      {milestone.description}
-                    </p>
-                  )}
-                </div>
-              ))}
+              {(() => {
+                const sorted = [...milestones].sort(
+                  (a, b) => a.order_index - b.order_index
+                )
+                const currentId = sorted.find((m) => m.status !== "completed")?.id
+                return sorted.map((milestone) => {
+                  const isCompleted = milestone.status === "completed"
+                  const isCurrent = milestone.id === currentId
+                  return (
+                    <div
+                      key={milestone.id}
+                      className={`rounded-2xl ${
+                        isCompleted
+                          ? "bg-[#34c759]/5 border-l-[3px] border-[#34c759]"
+                          : isCurrent
+                            ? "bg-[#f8f1de] border-l-[3px] border-[#f5c542]"
+                            : "bg-[#f8f1de]/40"
+                      } ${compact ? "p-3" : "p-4"}`}
+                    >
+                      <p
+                        className={`font-medium ${
+                          isCompleted
+                            ? "text-[#8a8a8a] line-through"
+                            : "text-[#1d1d1f]"
+                        } ${compact ? "text-sm" : ""}`}
+                      >
+                        {milestone.title}
+                      </p>
+                      {milestone.description && (
+                        <p className={`text-[#8a8a8a] mt-1 ${compact ? "text-[10px]" : "text-xs"}`}>
+                          {milestone.description}
+                        </p>
+                      )}
+                    </div>
+                  )
+                })
+              })()}
             </div>
           )}
         </CardContent>

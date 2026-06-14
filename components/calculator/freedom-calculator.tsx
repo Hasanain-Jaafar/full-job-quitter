@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Save, Loader2, Wallet, Briefcase, PiggyBank, TrendingUp, Calendar, Shield, Target, Umbrella, ArrowRight } from "lucide-react"
+import { Save, Loader2, Wallet, Briefcase, PiggyBank, TrendingUp, Calendar, Shield, Target, Umbrella, ArrowRight, HelpCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -16,6 +16,12 @@ import { upsertFinancialGoal } from "@/lib/financial/actions"
 import { calculateRunway, formatCurrency, formatNumber } from "@/lib/calculator/utils"
 import { toast } from "sonner"
 import type { FinancialGoal } from "@/lib/financial/actions"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface FreedomCalculatorProps {
   initialGoal: FinancialGoal | null
@@ -62,6 +68,24 @@ function ProjectionBars({
   )
 }
 
+function FieldTooltip({ children }: { children: React.ReactNode }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          className="inline-flex text-[#b0b0b0] hover:text-[#8a8a8a] transition-colors"
+        >
+          <HelpCircle size={14} strokeWidth={1.75} />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="bottom" align="start">
+        {children}
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
 interface MoneyFieldProps {
   label: string
   icon: React.ElementType
@@ -71,6 +95,7 @@ interface MoneyFieldProps {
   max?: number
   step?: number
   note?: React.ReactNode
+  tooltip?: React.ReactNode
 }
 
 function MoneyField({
@@ -82,14 +107,17 @@ function MoneyField({
   max = 50000,
   step = 500,
   note,
+  tooltip,
 }: MoneyFieldProps) {
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <Label className="flex items-center gap-2 text-[#1d1d1f]">
-          <Icon size={16} strokeWidth={1.75} />
-          {label}
-        </Label>
+    <TooltipProvider>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label className="flex items-center gap-2 text-[#1d1d1f]">
+            <Icon size={16} strokeWidth={1.75} />
+            {label}
+            {tooltip && <FieldTooltip>{tooltip}</FieldTooltip>}
+          </Label>
         <span className="text-sm font-medium text-[#f5c542]">
           {formatCurrency(value)}
         </span>
@@ -107,8 +135,9 @@ function MoneyField({
         onChange={onChange}
         className="rounded-xl"
       />
-      {note && <div className="text-xs text-[#8a8a8a]">{note}</div>}
-    </div>
+        {note && <div className="text-xs text-[#8a8a8a]">{note}</div>}
+      </div>
+    </TooltipProvider>
   )
 }
 
@@ -121,6 +150,7 @@ interface NumberFieldProps {
   max?: number
   step?: number
   unit?: string
+  tooltip?: React.ReactNode
 }
 
 function NumberField({
@@ -132,14 +162,17 @@ function NumberField({
   max = 60,
   step = 1,
   unit,
+  tooltip,
 }: NumberFieldProps) {
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <Label className="flex items-center gap-2 text-[#1d1d1f]">
-          <Icon size={16} strokeWidth={1.75} />
-          {label}
-        </Label>
+    <TooltipProvider>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label className="flex items-center gap-2 text-[#1d1d1f]">
+            <Icon size={16} strokeWidth={1.75} />
+            {label}
+            {tooltip && <FieldTooltip>{tooltip}</FieldTooltip>}
+          </Label>
         <span className="text-sm font-medium text-[#f5c542]">
           {value} {unit}
         </span>
@@ -152,20 +185,21 @@ function NumberField({
         step={step}
         className="py-2"
       />
-      <div className="relative">
-        <Input
-          type="number"
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 pr-16"
-        />
-        {unit && (
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#8a8a8a]">
-            {unit}
-          </span>
-        )}
+        <div className="relative">
+          <Input
+            type="number"
+            value={value}
+            onChange={(e) => onChange(Number(e.target.value))}
+            className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 pr-16"
+          />
+          {unit && (
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#8a8a8a]">
+              {unit}
+            </span>
+          )}
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   )
 }
 
@@ -425,6 +459,7 @@ export function FreedomCalculator({ initialGoal, riskTolerance }: FreedomCalcula
                 min={0}
                 max={50000}
                 step={500}
+                tooltip="Your total take-home pay from your current job after taxes"
               />
 
               <MoneyField
@@ -435,6 +470,7 @@ export function FreedomCalculator({ initialGoal, riskTolerance }: FreedomCalcula
                 min={0}
                 max={20000}
                 step={100}
+                tooltip="Everything you spend to live: rent, food, bills, subscriptions, fun"
               />
 
               <MoneyField
@@ -445,14 +481,19 @@ export function FreedomCalculator({ initialGoal, riskTolerance }: FreedomCalcula
                 min={0}
                 max={500000}
                 step={1000}
+                tooltip="Cash you have right now in savings accounts — don't count investments"
               />
 
-              <div className="space-y-2 rounded-2xl bg-[#f8f1de] p-4">
-                <div className="flex items-center justify-between">
-                  <Label className="flex items-center gap-2 text-[#1d1d1f]">
-                    <TrendingUp size={16} strokeWidth={1.75} />
-                    Monthly savings
-                  </Label>
+              <TooltipProvider>
+                <div className="space-y-2 rounded-2xl bg-[#f8f1de] p-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="flex items-center gap-2 text-[#1d1d1f]">
+                      <TrendingUp size={16} strokeWidth={1.75} />
+                      Monthly savings
+                      <FieldTooltip>
+                        Automatically calculated: salary minus expenses
+                      </FieldTooltip>
+                    </Label>
                   <span
                     className={`text-sm font-semibold ${
                       isOverspending ? "text-[#ff3b30]" : "text-[#34c759]"
@@ -461,12 +502,13 @@ export function FreedomCalculator({ initialGoal, riskTolerance }: FreedomCalcula
                     {formatCurrency(monthlySavings)}
                   </span>
                 </div>
-                <p className="text-xs text-[#8a8a8a]">
-                  {isOverspending
-                    ? "You're spending more than you earn"
-                    : "Auto-calculated: salary minus expenses"}
-                </p>
-              </div>
+                  <p className="text-xs text-[#8a8a8a]">
+                    {isOverspending
+                      ? "You're spending more than you earn"
+                      : "Auto-calculated: salary minus expenses"}
+                  </p>
+                </div>
+              </TooltipProvider>
             </CardContent>
           </Card>
 
@@ -489,6 +531,7 @@ export function FreedomCalculator({ initialGoal, riskTolerance }: FreedomCalcula
                 min={0}
                 max={50000}
                 step={500}
+                tooltip="Money from freelancing, side work, or part-time gigs after you quit"
                 note={
                   <>
                     Also set in{" "}
@@ -510,6 +553,7 @@ export function FreedomCalculator({ initialGoal, riskTolerance }: FreedomCalcula
                 min={0}
                 max={20000}
                 step={100}
+                tooltip="Your costs might change: no commute, different city, cheaper lifestyle?"
               />
 
               <NumberField
@@ -521,6 +565,7 @@ export function FreedomCalculator({ initialGoal, riskTolerance }: FreedomCalcula
                 max={60}
                 step={1}
                 unit="months"
+                tooltip="How many months you want savings to last if post-quit income drops to zero"
               />
 
               <Button
