@@ -92,9 +92,9 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
     goal?.emergency_fund_months || 6
   )
 
-  // Preferences (local-only for now)
-  const [notifications, setNotifications] = useState(true)
-  const [compactMode, setCompactMode] = useState(false)
+  // Preferences
+  const [emailReminders, setEmailReminders] = useState(profile?.email_reminders ?? true)
+  const [compactMode, setCompactMode] = useState(profile?.compact_mode ?? false)
 
   function showSaved(section: string) {
     setSavedSection(section)
@@ -125,6 +125,17 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
         emergency_fund_months: emergencyFundMonths,
       })
       showSaved("escape")
+    })
+  }
+
+  function handleSavePreferences(e: React.FormEvent) {
+    e.preventDefault()
+    startTransition(async () => {
+      await updateProfile({
+        compact_mode: compactMode,
+        email_reminders: emailReminders,
+      })
+      showSaved("preferences")
     })
   }
 
@@ -456,7 +467,7 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <form onSubmit={handleSavePreferences} className="space-y-4">
                 <div className="flex items-center justify-between p-4 rounded-2xl bg-[#f8f1de]">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-[#f5c542]/20 flex items-center justify-center">
@@ -471,14 +482,14 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
                   </div>
                   <button
                     type="button"
-                    onClick={() => setNotifications(!notifications)}
+                    onClick={() => setEmailReminders(!emailReminders)}
                     className={`w-12 h-7 rounded-full transition-colors relative ${
-                      notifications ? "bg-[#1d1d1f]" : "bg-[#e8e0cc]"
+                      emailReminders ? "bg-[#1d1d1f]" : "bg-[#e8e0cc]"
                     }`}
                   >
                     <span
                       className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white transition-transform ${
-                        notifications ? "translate-x-5" : ""
+                        emailReminders ? "translate-x-5" : ""
                       }`}
                     />
                   </button>
@@ -510,7 +521,25 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
                     />
                   </button>
                 </div>
-              </div>
+
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="h-12 rounded-xl bg-[#1d1d1f] hover:bg-[#1d1d1f]/90 text-white px-6"
+                >
+                  {isPending ? (
+                    <Loader2 className="animate-spin" size={18} strokeWidth={1.75} />
+                  ) : (
+                    <>
+                      <Save size={18} strokeWidth={1.75} className="mr-2" />
+                      Save preferences
+                    </>
+                  )}
+                </Button>
+                {savedSection === "preferences" && (
+                  <p className="text-sm text-[#34c759]">Preferences saved.</p>
+                )}
+              </form>
             </CardContent>
           </Card>
         </motion.div>

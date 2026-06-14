@@ -7,9 +7,10 @@ import { formatCurrency } from "@/lib/calculator/utils"
 interface ExpenseBarChartProps {
   categories: ExpenseCategory[]
   expensesByCategory: Record<string, number>
+  compact?: boolean
 }
 
-export function ExpenseBarChart({ categories, expensesByCategory }: ExpenseBarChartProps) {
+export function ExpenseBarChart({ categories, expensesByCategory, compact = false }: ExpenseBarChartProps) {
   const data = categories.map((category) => ({
     name: category.name,
     amount: expensesByCategory[category.id] || 0,
@@ -20,9 +21,9 @@ export function ExpenseBarChart({ categories, expensesByCategory }: ExpenseBarCh
   const maxAmount = Math.max(...data.map((d) => d.amount), ...data.map((d) => d.budget), 1)
 
   return (
-    <div className="space-y-5">
+    <div className={compact ? "space-y-3" : "space-y-5"}>
       {data.length === 0 ? (
-        <p className="text-sm text-[#8a8a8a]">No expense categories yet.</p>
+        <p className={`text-[#8a8a8a] ${compact ? "text-xs" : "text-sm"}`}>No expense categories yet.</p>
       ) : (
         data.map((item, index) => (
           <motion.div
@@ -30,9 +31,9 @@ export function ExpenseBarChart({ categories, expensesByCategory }: ExpenseBarCh
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.05 }}
-            className="space-y-2"
+            className={compact ? "space-y-1.5" : "space-y-2"}
           >
-            <div className="flex items-center justify-between text-sm">
+            <div className={`flex items-center justify-between ${compact ? "text-xs" : "text-sm"}`}>
               <span className="font-medium text-[#1d1d1f]">{item.name}</span>
               <span className="text-[#8a8a8a]">
                 {formatCurrency(item.amount)}
@@ -41,7 +42,7 @@ export function ExpenseBarChart({ categories, expensesByCategory }: ExpenseBarCh
                 )}
               </span>
             </div>
-            <div className="h-3 bg-[#f8f1de] rounded-full overflow-hidden">
+            <div className={`bg-[#f8f1de] rounded-full overflow-hidden ${compact ? "h-2" : "h-3"}`}>
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${Math.min((item.amount / maxAmount) * 100, 100)}%` }}

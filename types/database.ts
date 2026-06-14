@@ -11,6 +11,8 @@ export type Database = {
           current_job_title: string | null
           why_quit: string | null
           risk_tolerance: "conservative" | "moderate" | "aggressive" | null
+          compact_mode: boolean
+          email_reminders: boolean
           created_at: string
           updated_at: string
         }
@@ -21,6 +23,8 @@ export type Database = {
           current_job_title?: string | null
           why_quit?: string | null
           risk_tolerance?: "conservative" | "moderate" | "aggressive" | null
+          compact_mode?: boolean
+          email_reminders?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -31,6 +35,8 @@ export type Database = {
           current_job_title?: string | null
           why_quit?: string | null
           risk_tolerance?: "conservative" | "moderate" | "aggressive" | null
+          compact_mode?: boolean
+          email_reminders?: boolean
           created_at?: string
           updated_at?: string
         }

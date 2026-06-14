@@ -46,12 +46,13 @@ export default async function DashboardPage() {
   const profile = userData.user
     ? await supabase
         .from("profiles")
-        .select("full_name")
+        .select("full_name, compact_mode")
         .eq("id", userData.user.id)
         .single()
     : null
 
   const fullName = profile?.data?.full_name ?? userData.user?.email?.split("@")[0] ?? ""
+  const compact = profile?.data?.compact_mode ?? false
 
   const completedMilestones = milestones.filter((m) => m.status === "completed").length
   const milestoneProgress = milestones.length > 0
@@ -86,30 +87,31 @@ export default async function DashboardPage() {
     : 0
 
   return (
-    <div className="space-y-8">
+    <div className={compact ? "space-y-6" : "space-y-8"}>
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <WelcomeHeader name={fullName} />
-        <div className="flex flex-wrap gap-3">
-          <StatPill label="Income" value={formatCurrency(monthlyIncome)} variant="default" />
-          <StatPill label="Expenses" value={formatCurrency(totalOutflows)} variant="dark" />
-          <StatPill label="Net savings" value={formatCurrency(netSavings)} variant="accent" />
+        <WelcomeHeader name={fullName} compact={compact} />
+        <div className={`flex flex-wrap ${compact ? "gap-2" : "gap-3"}`}>
+          <StatPill label="Income" value={formatCurrency(monthlyIncome)} variant="default" compact={compact} />
+          <StatPill label="Expenses" value={formatCurrency(totalOutflows)} variant="dark" compact={compact} />
+          <StatPill label="Net savings" value={formatCurrency(netSavings)} variant="accent" compact={compact} />
           <StatPill
             label="Runway"
             value={`${formatNumber(runway?.currentRunwayMonths ?? 0, 1)} mo`}
             variant="default"
+            compact={compact}
           />
         </div>
       </div>
 
       {/* Main metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        <Card className="bg-white rounded-3xl border-none shadow-sm p-6">
-          <p className="text-sm text-[#8a8a8a] mb-1">Total savings</p>
-          <p className="text-4xl font-semibold text-[#1d1d1f]">
+      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${compact ? "gap-4" : "gap-5"}`}>
+        <Card className={`bg-white rounded-3xl border-none shadow-sm ${compact ? "p-5" : "p-6"}`}>
+          <p className={`text-[#8a8a8a] mb-1 ${compact ? "text-xs" : "text-sm"}`}>Total savings</p>
+          <p className={`font-semibold text-[#1d1d1f] ${compact ? "text-3xl" : "text-4xl"}`}>
             {formatCurrency(Number(goal?.current_savings) || 0)}
           </p>
-          <div className="mt-4 h-1.5 bg-[#f8f1de] rounded-full overflow-hidden">
+          <div className={`h-1.5 bg-[#f8f1de] rounded-full overflow-hidden ${compact ? "mt-3" : "mt-4"}`}>
             <div
               className="h-full bg-[#f5c542] rounded-full"
               style={{ width: `${fundingProgress}%` }}
@@ -117,57 +119,57 @@ export default async function DashboardPage() {
           </div>
         </Card>
 
-        <Card className="bg-white rounded-3xl border-none shadow-sm p-6">
-          <p className="text-sm text-[#8a8a8a] mb-1">Freedom funded</p>
-          <p className="text-4xl font-semibold text-[#1d1d1f]">
+        <Card className={`bg-white rounded-3xl border-none shadow-sm ${compact ? "p-5" : "p-6"}`}>
+          <p className={`text-[#8a8a8a] mb-1 ${compact ? "text-xs" : "text-sm"}`}>Freedom funded</p>
+          <p className={`font-semibold text-[#1d1d1f] ${compact ? "text-3xl" : "text-4xl"}`}>
             {formatNumber(fundingProgress, 1)}%
           </p>
-          <p className="text-sm text-[#8a8a8a] mt-2">
+          <p className={`text-[#8a8a8a] ${compact ? "text-xs mt-1.5" : "text-sm mt-2"}`}>
             Goal: {formatCurrency(runway?.requiredSavings ?? 0)}
           </p>
         </Card>
 
-        <Card className="bg-white rounded-3xl border-none shadow-sm p-6">
-          <p className="text-sm text-[#8a8a8a] mb-1">Months to freedom</p>
-          <p className="text-4xl font-semibold text-[#1d1d1f]">
+        <Card className={`bg-white rounded-3xl border-none shadow-sm ${compact ? "p-5" : "p-6"}`}>
+          <p className={`text-[#8a8a8a] mb-1 ${compact ? "text-xs" : "text-sm"}`}>Months to freedom</p>
+          <p className={`font-semibold text-[#1d1d1f] ${compact ? "text-3xl" : "text-4xl"}`}>
             {runway?.projectedMonthsToGoal ?? "—"}
           </p>
-          <p className="text-sm text-[#8a8a8a] mt-2">
+          <p className={`text-[#8a8a8a] ${compact ? "text-xs mt-1.5" : "text-sm mt-2"}`}>
             {runway?.projectedQuitDate
               ? runway.projectedQuitDate.toLocaleDateString("en-US", { month: "short", year: "numeric" })
               : "Add your finances"}
           </p>
         </Card>
 
-        <Card className="bg-white rounded-3xl border-none shadow-sm p-6">
-          <p className="text-sm text-[#8a8a8a] mb-1">Active subscriptions</p>
-          <p className="text-4xl font-semibold text-[#1d1d1f]">
+        <Card className={`bg-white rounded-3xl border-none shadow-sm ${compact ? "p-5" : "p-6"}`}>
+          <p className={`text-[#8a8a8a] mb-1 ${compact ? "text-xs" : "text-sm"}`}>Active subscriptions</p>
+          <p className={`font-semibold text-[#1d1d1f] ${compact ? "text-3xl" : "text-4xl"}`}>
             {subscriptions.length}
           </p>
-          <p className="text-sm text-[#8a8a8a] mt-2">
+          <p className={`text-[#8a8a8a] ${compact ? "text-xs mt-1.5" : "text-sm mt-2"}`}>
             {formatCurrency(totalSubscriptions)}/mo
           </p>
         </Card>
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <div className={`grid grid-cols-1 lg:grid-cols-12 ${compact ? "gap-4" : "gap-5"}`}>
         {/* Welcome / profile card */}
         <Card className="lg:col-span-4 bg-[#f5c542] rounded-3xl border-none shadow-sm overflow-hidden">
-          <CardContent className="p-8 h-full flex flex-col justify-between">
+          <CardContent className={`h-full flex flex-col justify-between ${compact ? "p-6" : "p-8"}`}>
             <div>
-              <div className="w-16 h-16 rounded-2xl bg-white/30 flex items-center justify-center mb-6">
-                <Wallet size={32} strokeWidth={1.75} className="text-[#1d1d1f]" />
+              <div className={`rounded-2xl bg-white/30 flex items-center justify-center ${compact ? "w-14 h-14 mb-4" : "w-16 h-16 mb-6"}`}>
+                <Wallet size={compact ? 28 : 32} strokeWidth={1.75} className="text-[#1d1d1f]" />
               </div>
-              <h3 className="text-2xl font-semibold text-[#1d1d1f] mb-2">
+              <h3 className={`font-semibold text-[#1d1d1f] mb-2 ${compact ? "text-xl" : "text-2xl"}`}>
                 Your escape fund
               </h3>
-              <p className="text-[#1d1d1f]/70">
+              <p className={`text-[#1d1d1f]/70 ${compact ? "text-sm" : ""}`}>
                 Track every dollar that brings you closer to quitting.
               </p>
             </div>
             <Link href="/finances">
-              <Button className="mt-6 rounded-xl bg-[#1d1d1f] hover:bg-[#1d1d1f]/90 text-white">
+              <Button className={`rounded-xl bg-[#1d1d1f] hover:bg-[#1d1d1f]/90 text-white ${compact ? "mt-4 h-10" : "mt-6"}`}>
                 Manage finances
                 <ArrowUpRight size={16} strokeWidth={1.75} className="ml-2" />
               </Button>
@@ -177,93 +179,95 @@ export default async function DashboardPage() {
 
         {/* Expense breakdown */}
         <Card className="lg:col-span-5 bg-white rounded-3xl border-none shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-semibold text-[#1d1d1f] flex items-center gap-2">
-              <Receipt size={18} strokeWidth={1.75} />
+          <CardHeader className={`flex flex-row items-center justify-between ${compact ? "pb-2" : ""}`}>
+            <CardTitle className={`font-semibold text-[#1d1d1f] flex items-center gap-2 ${compact ? "text-base" : "text-lg"}`}>
+              <Receipt size={compact ? 16 : 18} strokeWidth={1.75} />
               Expense breakdown
             </CardTitle>
             <Link href="/finances">
-              <Button variant="ghost" className="rounded-xl text-[#8a8a8a]">
+              <Button variant="ghost" className={`rounded-xl text-[#8a8a8a] ${compact ? "h-8 text-sm" : ""}`}>
                 Manage
               </Button>
             </Link>
           </CardHeader>
-          <CardContent>
-            <ExpenseBarChart categories={categories} expensesByCategory={expensesByCategory} />
+          <CardContent className={compact ? "pt-2" : ""}>
+            <ExpenseBarChart categories={categories} expensesByCategory={expensesByCategory} compact={compact} />
           </CardContent>
         </Card>
 
         {/* Milestone progress */}
         <Card className="lg:col-span-3 bg-white rounded-3xl border-none shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-[#1d1d1f] flex items-center gap-2">
-              <Target size={18} strokeWidth={1.75} />
+          <CardHeader className={compact ? "pb-2" : ""}>
+            <CardTitle className={`font-semibold text-[#1d1d1f] flex items-center gap-2 ${compact ? "text-base" : "text-lg"}`}>
+              <Target size={compact ? 16 : 18} strokeWidth={1.75} />
               Milestones
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col items-center">
+          <CardContent className={`flex flex-col items-center ${compact ? "pt-2" : ""}`}>
             <CircularProgress
               value={milestoneProgress}
               label={`${completedMilestones}/${milestones.length}`}
               sublabel="completed"
+              size={compact ? 112 : 140}
+              strokeWidth={compact ? 10 : 12}
             />
-            <div className="w-full mt-6">
-              <MilestoneMiniList milestones={milestones} />
+            <div className={`w-full ${compact ? "mt-4" : "mt-6"}`}>
+              <MilestoneMiniList milestones={milestones} compact={compact} />
             </div>
           </CardContent>
         </Card>
 
         {/* Subscriptions & loans dark card */}
         <Card className="lg:col-span-4 bg-[#1d1d1f] rounded-3xl border-none shadow-sm">
-          <CardContent className="p-6 h-full">
-            <SubscriptionLoanCard subscriptions={subscriptions} loans={loans} />
+          <CardContent className={`h-full ${compact ? "p-5" : "p-6"}`}>
+            <SubscriptionLoanCard subscriptions={subscriptions} loans={loans} compact={compact} />
           </CardContent>
         </Card>
 
         {/* Recent expenses */}
         <Card className="lg:col-span-4 bg-white rounded-3xl border-none shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-semibold text-[#1d1d1f] flex items-center gap-2">
-              <TrendingDown size={18} strokeWidth={1.75} />
+          <CardHeader className={`flex flex-row items-center justify-between ${compact ? "pb-2" : ""}`}>
+            <CardTitle className={`font-semibold text-[#1d1d1f] flex items-center gap-2 ${compact ? "text-base" : "text-lg"}`}>
+              <TrendingDown size={compact ? 16 : 18} strokeWidth={1.75} />
               Recent expenses
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <RecentExpenses expenses={expenses} categories={categories} />
+          <CardContent className={compact ? "pt-2" : ""}>
+            <RecentExpenses expenses={expenses} categories={categories} compact={compact} />
           </CardContent>
         </Card>
 
         {/* Calendar / projected quit date */}
         <Card className="lg:col-span-4 bg-white rounded-3xl border-none shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-[#1d1d1f] flex items-center gap-2">
-              <Calendar size={18} strokeWidth={1.75} />
+          <CardHeader className={compact ? "pb-2" : ""}>
+            <CardTitle className={`font-semibold text-[#1d1d1f] flex items-center gap-2 ${compact ? "text-base" : "text-lg"}`}>
+              <Calendar size={compact ? 16 : 18} strokeWidth={1.75} />
               Target timeline
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className={compact ? "space-y-4 pt-2" : "space-y-6"}>
             <div className="flex items-center justify-between">
-              <span className="text-[#8a8a8a]">Monthly runway target</span>
-              <span className="font-semibold text-[#1d1d1f]">
+              <span className={`text-[#8a8a8a] ${compact ? "text-sm" : ""}`}>Monthly runway target</span>
+              <span className={`font-semibold text-[#1d1d1f] ${compact ? "text-sm" : ""}`}>
                 {goal?.target_runway_months ?? 0} months
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[#8a8a8a]">Required savings</span>
-              <span className="font-semibold text-[#1d1d1f]">
+              <span className={`text-[#8a8a8a] ${compact ? "text-sm" : ""}`}>Required savings</span>
+              <span className={`font-semibold text-[#1d1d1f] ${compact ? "text-sm" : ""}`}>
                 {formatCurrency(runway?.requiredSavings ?? 0)}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[#8a8a8a]">Current runway</span>
-              <span className="font-semibold text-[#1d1d1f]">
+              <span className={`text-[#8a8a8a] ${compact ? "text-sm" : ""}`}>Current runway</span>
+              <span className={`font-semibold text-[#1d1d1f] ${compact ? "text-sm" : ""}`}>
                 {formatNumber(runway?.currentRunwayMonths ?? 0, 1)} months
               </span>
             </div>
-            <div className="h-24 bg-[#f8f1de] rounded-2xl flex items-center justify-center">
+            <div className={`bg-[#f8f1de] rounded-2xl flex items-center justify-center ${compact ? "h-20" : "h-24"}`}>
               <div className="text-center">
-                <p className="text-sm text-[#8a8a8a]">Projected quit date</p>
-                <p className="text-2xl font-semibold text-[#1d1d1f]">
+                <p className={`text-[#8a8a8a] ${compact ? "text-xs" : "text-sm"}`}>Projected quit date</p>
+                <p className={`font-semibold text-[#1d1d1f] ${compact ? "text-xl" : "text-2xl"}`}>
                   {runway?.projectedQuitDate
                     ? runway.projectedQuitDate.toLocaleDateString("en-US", {
                         month: "long",
@@ -279,21 +283,21 @@ export default async function DashboardPage() {
 
       {/* Milestones section */}
       <Card className="bg-white rounded-3xl border-none shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg font-semibold text-[#1d1d1f] flex items-center gap-2">
-            <Route size={18} strokeWidth={1.75} />
+        <CardHeader className={`flex flex-row items-center justify-between ${compact ? "pb-2" : ""}`}>
+          <CardTitle className={`font-semibold text-[#1d1d1f] flex items-center gap-2 ${compact ? "text-base" : "text-lg"}`}>
+            <Route size={compact ? 16 : 18} strokeWidth={1.75} />
             Your roadmap
           </CardTitle>
           <Link href="/milestones">
-            <Button variant="ghost" className="rounded-xl text-[#8a8a8a]">
+            <Button variant="ghost" className={`rounded-xl text-[#8a8a8a] ${compact ? "h-8 text-sm" : ""}`}>
               View all
             </Button>
           </Link>
         </CardHeader>
-        <CardContent>
+        <CardContent className={compact ? "pt-2" : ""}>
           {milestones.length === 0 ? (
-            <div className="text-center py-6">
-              <p className="text-[#8a8a8a] mb-4">
+            <div className={`text-center ${compact ? "py-4" : "py-6"}`}>
+              <p className={`text-[#8a8a8a] mb-4 ${compact ? "text-sm" : ""}`}>
                 No milestones yet. Create your roadmap to quitting.
               </p>
               <Link href="/milestones">
@@ -303,27 +307,27 @@ export default async function DashboardPage() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${compact ? "gap-3" : "gap-4"}`}>
               {milestones.map((milestone) => (
                 <div
                   key={milestone.id}
-                  className={`p-4 rounded-2xl border-l-4 ${
+                  className={`rounded-2xl border-l-4 ${
                     milestone.status === "completed"
                       ? "bg-[#34c759]/5 border-[#34c759]"
                       : "bg-[#f8f1de] border-[#f5c542]"
-                  }`}
+                  } ${compact ? "p-3" : "p-4"}`}
                 >
                   <p
                     className={`font-medium ${
                       milestone.status === "completed"
                         ? "text-[#8a8a8a] line-through"
                         : "text-[#1d1d1f]"
-                    }`}
+                    } ${compact ? "text-sm" : ""}`}
                   >
                     {milestone.title}
                   </p>
                   {milestone.description && (
-                    <p className="text-xs text-[#8a8a8a] mt-1">
+                    <p className={`text-[#8a8a8a] mt-1 ${compact ? "text-[10px]" : "text-xs"}`}>
                       {milestone.description}
                     </p>
                   )}

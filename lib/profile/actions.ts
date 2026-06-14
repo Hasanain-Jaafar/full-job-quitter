@@ -9,6 +9,8 @@ export async function updateProfile(data: {
   current_job_title?: string
   why_quit?: string
   risk_tolerance?: "conservative" | "moderate" | "aggressive" | null
+  compact_mode?: boolean
+  email_reminders?: boolean
 }) {
   const supabase = await createClient()
   const { data: userData, error: userError } = await supabase.auth.getUser()
@@ -25,6 +27,8 @@ export async function updateProfile(data: {
       current_job_title: data.current_job_title ?? null,
       why_quit: data.why_quit ?? null,
       risk_tolerance: data.risk_tolerance ?? null,
+      compact_mode: data.compact_mode,
+      email_reminders: data.email_reminders,
       updated_at: new Date().toISOString(),
     })
     .eq("id", userData.user.id)
