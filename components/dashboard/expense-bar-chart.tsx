@@ -1,6 +1,9 @@
 "use client"
 
+import Link from "next/link"
 import { motion } from "framer-motion"
+import { Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import type { ExpenseCategory } from "@/lib/finances/actions"
 import { formatCurrency } from "@/lib/calculator/utils"
 
@@ -23,7 +26,20 @@ export function ExpenseBarChart({ categories, expensesByCategory, compact = fals
   return (
     <div className={compact ? "space-y-3" : "space-y-5"}>
       {data.length === 0 ? (
-        <p className={`text-[#8a8a8a] ${compact ? "text-xs" : "text-sm"}`}>No expense categories yet.</p>
+        <div className={`flex flex-col items-center justify-center text-center ${compact ? "py-6" : "py-10"}`}>
+          <p className={`text-[#8a8a8a] mb-3 ${compact ? "text-xs" : "text-sm"}`}>
+            No expense categories yet
+          </p>
+          <Link href="/finances?tab=categories">
+            <Button
+              variant="outline"
+              className={`rounded-xl border-[#e8e0cc] bg-white hover:bg-[#f8f1de] text-[#1d1d1f] ${compact ? "h-8 text-xs" : "h-10"}`}
+            >
+              <Plus size={compact ? 14 : 16} strokeWidth={1.75} className="mr-1.5" />
+              Add your first expense
+            </Button>
+          </Link>
+        </div>
       ) : (
         data.map((item, index) => (
           <motion.div

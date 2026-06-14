@@ -1,6 +1,9 @@
 "use client"
 
+import Link from "next/link"
 import { motion } from "framer-motion"
+import { Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import type { Expense, ExpenseCategory } from "@/lib/finances/actions"
 import { formatCurrency } from "@/lib/calculator/utils"
 
@@ -16,7 +19,20 @@ export function RecentExpenses({ expenses, categories, compact = false }: Recent
   return (
     <div className={compact ? "space-y-3" : "space-y-4"}>
       {recent.length === 0 ? (
-        <p className={`text-[#8a8a8a] ${compact ? "text-xs" : "text-sm"}`}>No expenses recorded yet.</p>
+        <div className={`flex flex-col items-center justify-center text-center ${compact ? "py-6" : "py-10"}`}>
+          <p className={`text-[#8a8a8a] mb-3 ${compact ? "text-xs" : "text-sm"}`}>
+            No expenses recorded yet
+          </p>
+          <Link href="/finances?tab=expenses">
+            <Button
+              variant="outline"
+              className={`rounded-xl border-[#e8e0cc] bg-white hover:bg-[#f8f1de] text-[#1d1d1f] ${compact ? "h-8 text-xs" : "h-10"}`}
+            >
+              <Plus size={compact ? 14 : 16} strokeWidth={1.75} className="mr-1.5" />
+              Record an expense
+            </Button>
+          </Link>
+        </div>
       ) : (
         recent.map((expense, index) => {
           const category = categories.find((c) => c.id === expense.category_id)

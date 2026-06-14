@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import {
   Wallet,
@@ -16,6 +17,7 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { CurrencyInput } from "@/components/ui/currency-input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -73,7 +75,25 @@ export function FinanceManager({
   loans,
 }: FinanceManagerProps) {
   const [isPending, startTransition] = useTransition()
-  const [activeTab, setActiveTab] = useState("income")
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const tabParam = searchParams.get("tab")
+  const validTabs = ["income", "categories", "expenses", "subscriptions", "loans"]
+  const initialTab = tabParam && validTabs.includes(tabParam) ? tabParam : "income"
+  const [activeTab, setActiveTab] = useState(initialTab)
+
+  useEffect(() => {
+    if (tabParam && validTabs.includes(tabParam) && tabParam !== activeTab) {
+      setActiveTab(tabParam)
+    }
+  }, [tabParam])
+
+  function handleTabChange(value: string) {
+    setActiveTab(value)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("tab", value)
+    router.replace(`/finances?${params.toString()}`, { scroll: false })
+  }
 
   // Income form
   const [monthlyIncome, setMonthlyIncome] = useState(
@@ -193,7 +213,7 @@ export function FinanceManager({
         </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="bg-white/60 p-1 rounded-2xl h-auto flex flex-wrap gap-1">
           <TabsTrigger
             value="income"
@@ -243,11 +263,10 @@ export function FinanceManager({
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-[#1d1d1f]">Your main monthly income</Label>
-                <Input
-                  type="number"
+                <CurrencyInput
                   value={monthlyIncome}
-                  onChange={(e) => setMonthlyIncome(Number(e.target.value))}
-                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50"
+                  onChange={(value) => setMonthlyIncome(value)}
+                  className="rounded-xl"
                 />
               </div>
               <Button
@@ -280,12 +299,11 @@ export function FinanceManager({
                   onChange={(e) => setCategoryName(e.target.value)}
                   className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 flex-1"
                 />
-                <Input
-                  type="number"
+                <CurrencyInput
                   placeholder="Budget limit"
                   value={categoryBudget}
-                  onChange={(e) => setCategoryBudget(e.target.value)}
-                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-40"
+                  onChange={(value) => setCategoryBudget(String(value))}
+                  className="md:w-40"
                 />
                 <Select value={categoryColor} onValueChange={setCategoryColor}>
                   <SelectTrigger className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 w-full md:w-48">
@@ -368,12 +386,11 @@ export function FinanceManager({
                   onChange={(e) => setExpenseName(e.target.value)}
                   className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 flex-1 min-w-[200px]"
                 />
-                <Input
-                  type="number"
+                <CurrencyInput
                   placeholder="Amount"
                   value={expenseAmount}
-                  onChange={(e) => setExpenseAmount(e.target.value)}
-                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-32"
+                  onChange={(value) => setExpenseAmount(String(value))}
+                  className="md:w-32"
                 />
                 <Select value={expenseCategory} onValueChange={setExpenseCategory}>
                   <SelectTrigger className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-48">
@@ -473,12 +490,11 @@ export function FinanceManager({
                   onChange={(e) => setSubName(e.target.value)}
                   className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 flex-1"
                 />
-                <Input
-                  type="number"
+                <CurrencyInput
                   placeholder="Amount"
                   value={subAmount}
-                  onChange={(e) => setSubAmount(e.target.value)}
-                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-32"
+                  onChange={(value) => setSubAmount(String(value))}
+                  className="md:w-32"
                 />
                 <Select value={subFrequency} onValueChange={(v) => setSubFrequency(v as "monthly" | "yearly")}>
                   <SelectTrigger className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-40">
@@ -558,26 +574,23 @@ export function FinanceManager({
                   onChange={(e) => setLoanName(e.target.value)}
                   className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 flex-1 min-w-[200px]"
                 />
-                <Input
-                  type="number"
+                <CurrencyInput
                   placeholder="Total amount"
                   value={loanTotal}
-                  onChange={(e) => setLoanTotal(e.target.value)}
-                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-36"
+                  onChange={(value) => setLoanTotal(String(value))}
+                  className="md:w-36"
                 />
-                <Input
-                  type="number"
+                <CurrencyInput
                   placeholder="Remaining"
                   value={loanRemaining}
-                  onChange={(e) => setLoanRemaining(e.target.value)}
-                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-36"
+                  onChange={(value) => setLoanRemaining(String(value))}
+                  className="md:w-36"
                 />
-                <Input
-                  type="number"
+                <CurrencyInput
                   placeholder="Monthly payment"
                   value={loanPayment}
-                  onChange={(e) => setLoanPayment(e.target.value)}
-                  className="h-12 rounded-xl border-[rgba(0,0,0,0.08)] bg-[#f8f1de]/50 md:w-36"
+                  onChange={(value) => setLoanPayment(String(value))}
+                  className="md:w-36"
                 />
                 <Input
                   type="number"

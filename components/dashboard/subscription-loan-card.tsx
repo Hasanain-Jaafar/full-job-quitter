@@ -1,7 +1,9 @@
 "use client"
 
+import Link from "next/link"
 import { motion } from "framer-motion"
-import { Repeat, Landmark, ArrowUpRight } from "lucide-react"
+import { Repeat, Landmark, ArrowUpRight, Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import type { Subscription, Loan } from "@/lib/finances/actions"
 import { formatCurrency } from "@/lib/calculator/utils"
 
@@ -15,9 +17,27 @@ export function SubscriptionLoanCard({ subscriptions, loans, compact = false }: 
   const totalSubscriptions = subscriptions.reduce((sum, s) => sum + Number(s.amount), 0)
   const totalLoanRemaining = loans.reduce((sum, l) => sum + Number(l.remaining_amount), 0)
   const totalLoanPayment = loans.reduce((sum, l) => sum + Number(l.monthly_payment), 0)
+  const isEmpty = subscriptions.length === 0 && loans.length === 0
 
   return (
     <div className="h-full flex flex-col">
+      {isEmpty ? (
+        <div className="flex-1 flex flex-col items-center justify-center text-center">
+          <p className={`text-white/70 mb-3 ${compact ? "text-xs" : "text-sm"}`}>
+            No subscriptions or loans tracked
+          </p>
+          <Link href="/finances?tab=subscriptions">
+            <Button
+              variant="outline"
+              className={`rounded-xl border-white/20 bg-white/10 hover:bg-white/20 text-white ${compact ? "h-8 text-xs" : "h-10"}`}
+            >
+              <Plus size={compact ? 14 : 16} strokeWidth={1.75} className="mr-1.5" />
+              Add subscription or loan
+            </Button>
+          </Link>
+        </div>
+      ) : (
+        <>
       <div className={`flex items-center justify-between ${compact ? "mb-4" : "mb-6"}`}>
         <h3 className={`font-semibold text-white ${compact ? "text-base" : "text-lg"}`}>Subscriptions & Loans</h3>
         <ArrowUpRight size={compact ? 16 : 18} strokeWidth={1.75} className="text-white/60" />
@@ -94,6 +114,8 @@ export function SubscriptionLoanCard({ subscriptions, loans, compact = false }: 
           </span>
         </div>
       </div>
+        </>
+      )}
     </div>
   )
 }
