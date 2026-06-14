@@ -12,7 +12,7 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardAction } from "@/components/ui/card"
 import { WelcomeHeader } from "@/components/dashboard/welcome-header"
 import { StatPill } from "@/components/dashboard/stat-pill"
 import { ExpenseBarChart } from "@/components/dashboard/expense-bar-chart"
@@ -328,14 +328,14 @@ export default async function DashboardPage() {
         </Card>
 
         <Card size={compact ? "compact" : "default"} className="lg:col-span-4 bg-white rounded-3xl border-none shadow-sm">
-          <CardHeader className={`flex flex-row items-center justify-between ${compact ? "pb-2" : ""}`}>
-            <CardTitle className={`font-semibold text-[#1d1d1f] flex items-center gap-2 ${compact ? "text-base" : "text-lg"}`}>
+          <CardHeader className={`${compact ? "pb-2" : ""}`}>
+            <CardTitle className={`flex items-center gap-2 ${compact ? "text-base" : "text-lg"}`}>
               <TrendingDown size={compact ? 16 : 18} strokeWidth={1.75} />
               Recent expenses
             </CardTitle>
-            <div className="flex items-center gap-2">
-              <LastUpdated date={expenseUpdatedAt} />
-              {expenses.length > 0 && (
+            <LastUpdated date={expenseUpdatedAt} />
+            {expenses.length > 0 && (
+              <CardAction>
                 <Link href="/finances?tab=expenses">
                   <Button
                     variant="outline"
@@ -345,8 +345,8 @@ export default async function DashboardPage() {
                     Add expense
                   </Button>
                 </Link>
-              )}
-            </div>
+              </CardAction>
+            )}
           </CardHeader>
           <CardContent className={compact ? "pt-2" : ""}>
             <RecentExpenses expenses={expenses} categories={categories} compact={compact} />
