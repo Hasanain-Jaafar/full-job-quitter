@@ -121,9 +121,9 @@ export default async function DashboardPage() {
     | undefined
 
   const riskConfig = {
-    conservative: { label: "Conservative plan", className: "bg-[#e8e0cc] text-[#1d1d1f]" },
-    moderate: { label: "Moderate plan", className: "bg-[#f5c542] text-[#1d1d1f]" },
-    aggressive: { label: "Aggressive plan", className: "bg-[#ff9500] text-white" },
+    conservative: { label: "Play it safe", className: "bg-[#e8e0cc] text-[#1d1d1f]" },
+    moderate: { label: "Balanced", className: "bg-[#f5c542] text-[#1d1d1f]" },
+    aggressive: { label: "Go for it", className: "bg-[#ff9500] text-white" },
   }
   const riskBadge = riskTolerance ? riskConfig[riskTolerance] : null
 

@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
@@ -101,9 +102,16 @@ export function Sidebar({ collapsed, onCollapseChange }: SidebarProps) {
                 <Link
                   href="/"
                   title="full-jog-quitter"
-                  className="text-lg font-semibold tracking-tight text-[#1d1d1f] whitespace-nowrap"
+                  className="flex items-center"
                 >
-                  full-jog-quitter
+                  <Image
+                    src="/logo.png"
+                    alt="full-jog-quitter logo"
+                    width={40}
+                    height={40}
+                    className="h-10 w-auto"
+                    priority
+                  />
                 </Link>
               </motion.div>
             ) : (
@@ -118,9 +126,16 @@ export function Sidebar({ collapsed, onCollapseChange }: SidebarProps) {
                 <Link
                   href="/"
                   title="full-jog-quitter"
-                  className="w-10 h-10 rounded-xl bg-[#f5c542] flex items-center justify-center text-[#1d1d1f] font-bold text-sm shadow-sm"
+                  className="flex items-center justify-center"
                 >
-                  FJ
+                  <Image
+                    src="/logo.png"
+                    alt="full-jog-quitter logo"
+                    width={40}
+                    height={40}
+                    className="h-10 w-auto"
+                    priority
+                  />
                 </Link>
               </motion.div>
             )}

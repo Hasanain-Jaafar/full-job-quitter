@@ -56,17 +56,17 @@ const riskOptions: {
 }[] = [
   {
     value: "conservative",
-    label: "Conservative",
-    description: "I want 12+ months runway before I quit.",
+    label: "Play it safe",
+    description: "I want 12+ months saved before I quit.",
   },
   {
     value: "moderate",
-    label: "Moderate",
-    description: "6-12 months runway feels right.",
+    label: "Balanced",
+    description: "6-12 months feels right.",
   },
   {
     value: "aggressive",
-    label: "Aggressive",
+    label: "Go for it",
     description: "I'll jump at 3-6 months with a solid plan.",
   },
 ]
@@ -84,7 +84,7 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
     "conservative" | "moderate" | "aggressive" | ""
   >(profile?.risk_tolerance || "")
 
-  // Escape plan fields
+  // Quit plan fields
   const [targetQuitDate, setTargetQuitDate] = useState(goal?.target_quit_date || "")
   const [targetRunway, setTargetRunway] = useState(goal?.target_runway_months || 12)
   const [postQuitIncome, setPostQuitIncome] = useState(
@@ -107,7 +107,7 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
 
   function handleSaveProfile(
     e: React.FormEvent,
-    message = "Identity updated"
+    message = "Profile updated"
   ) {
     e.preventDefault()
     setError(null)
@@ -142,7 +142,7 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
         setError(result.error)
         return
       }
-      toast.success("Escape plan updated")
+      toast.success("Quit plan updated")
       showSaved("escape")
     })
   }
@@ -228,9 +228,6 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
           </div>
 
           <div className="text-center md:text-left md:pt-2">
-            <p className="text-[#1d1d1f]/70 text-sm uppercase tracking-wide font-medium">
-              Escape artist
-            </p>
             <h2 className="text-3xl font-semibold text-[#1d1d1f]">{displayName}</h2>
             <p className="text-[#1d1d1f]/70 mt-1">
               {jobTitle || "Future free agent"} • Target: {targetQuitDate || "TBD"}
@@ -240,7 +237,7 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Profile identity */}
+        {/* Profile */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -250,11 +247,11 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-[#1d1d1f] flex items-center gap-2">
                 <User size={20} strokeWidth={1.75} />
-                Identity
+                Profile
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={(e) => handleSaveProfile(e, "Identity updated")} className="space-y-6">
+              <form onSubmit={(e) => handleSaveProfile(e, "Profile updated")} className="space-y-6">
                 <div className="space-y-2">
                   <Label className="text-[#1d1d1f]">Full name</Label>
                   <Input
@@ -301,19 +298,19 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
                   ) : (
                     <>
                       <Save size={18} strokeWidth={1.75} className="mr-2" />
-                      Save identity
+                      Save profile
                     </>
                   )}
                 </Button>
                 {savedSection === "profile" && (
-                  <p className="text-sm text-[#34c759]">Identity saved.</p>
+                  <p className="text-sm text-[#34c759]">Profile saved.</p>
                 )}
               </form>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Escape plan */}
+        {/* Your quit plan */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -323,7 +320,7 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-[#1d1d1f] flex items-center gap-2">
                 <Flag size={20} strokeWidth={1.75} />
-                Escape plan
+                Your quit plan
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -345,7 +342,7 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
                   <div className="space-y-2">
                     <Label className="text-[#1d1d1f] flex items-center gap-2">
                       <Target size={14} strokeWidth={1.75} />
-                      Runway months
+                      Months of safety
                     </Label>
                     <Input
                       type="number"
@@ -373,7 +370,7 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
                 <div className="space-y-2">
                   <Label className="text-[#1d1d1f] flex items-center gap-2">
                     <TrendingUp size={14} strokeWidth={1.75} />
-                    Desired post-quit monthly income
+                    Income after quitting
                   </Label>
                   <Input
                     type="number"
@@ -393,11 +390,22 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
                     <PiggyBank size={14} strokeWidth={1.75} />
                     Total target savings
                   </Label>
-                  <p className="text-2xl font-semibold text-[#1d1d1f]">
-                    {formatCurrency(postQuitIncome * targetRunway)}
+                  <p
+                    className={`${
+                      postQuitIncome === 0 && (goal?.monthly_expenses_after_quit || 0) === 0
+                        ? "text-sm text-[#8a8a8a]"
+                        : "text-2xl font-semibold text-[#1d1d1f]"
+                    }`}
+                  >
+                    {postQuitIncome === 0 && (goal?.monthly_expenses_after_quit || 0) === 0
+                      ? "Enter your income after quitting above to see your target"
+                      : formatCurrency(
+                          Math.max(0, (goal?.monthly_expenses_after_quit || 0) - postQuitIncome) *
+                            targetRunway
+                        )}
                   </p>
                   <p className="text-xs text-[#8a8a8a]">
-                    Based on desired income × runway months
+                    What you need saved before you can quit
                   </p>
                 </div>
 
@@ -411,12 +419,12 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
                   ) : (
                     <>
                       <Save size={18} strokeWidth={1.75} className="mr-2" />
-                      Save escape plan
+                      Save quit plan
                     </>
                   )}
                 </Button>
                 {savedSection === "escape" && (
-                  <p className="text-sm text-[#34c759]">Escape plan saved.</p>
+                  <p className="text-sm text-[#34c759]">Quit plan saved.</p>
                 )}
               </form>
             </CardContent>
@@ -447,7 +455,7 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
                 />
 
                 <div className="space-y-3">
-                  <Label className="text-white">Risk tolerance</Label>
+                  <Label className="text-white">How brave are you?</Label>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {riskOptions.map((option) => (
                       <button
@@ -543,9 +551,9 @@ export function ProfileForm({ profile, goal, email, userId }: ProfileFormProps) 
                       <Moon size={18} strokeWidth={1.75} className="text-[#1d1d1f]" />
                     </div>
                     <div>
-                      <p className="font-medium text-[#1d1d1f]">Compact dashboard</p>
+                      <p className="font-medium text-[#1d1d1f]">Compact view</p>
                       <p className="text-xs text-[#8a8a8a]">
-                        Show smaller cards with more data density
+                        Show more info on each screen
                       </p>
                     </div>
                   </div>

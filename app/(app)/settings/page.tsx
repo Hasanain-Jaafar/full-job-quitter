@@ -24,7 +24,7 @@ export default async function SettingsPage() {
           Settings
         </h1>
         <p className="text-[#8a8a8a] mt-1">
-          Craft your identity, escape plan, and motivation.
+          Your profile, quit plan, and motivation.
         </p>
       </div>
 

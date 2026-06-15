@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
@@ -14,11 +15,15 @@ export function Navbar() {
     >
       <nav className="mx-4 mt-4 md:mx-6 md:mt-6">
         <div className="bg-white/80 backdrop-blur-xl border border-[#e8e0cc] rounded-2xl px-5 py-3 max-w-7xl mx-auto flex items-center justify-between shadow-sm">
-          <Link
-            href="/"
-            className="text-lg font-semibold tracking-tight text-[#1d1d1f]"
-          >
-            full-jog-quitter
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/logo.png"
+              alt="full-jog-quitter logo"
+              width={40}
+              height={40}
+              className="h-10 w-auto"
+              priority
+            />
           </Link>
 
           <div className="flex items-center gap-3">

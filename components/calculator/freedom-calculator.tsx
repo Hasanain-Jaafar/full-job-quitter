@@ -400,9 +400,9 @@ export function FreedomCalculator({ initialGoal, riskTolerance }: FreedomCalcula
       : 0
 
   const riskConfig = {
-    conservative: { label: "Conservative plan", className: "bg-[#e8e0cc] text-[#1d1d1f] hover:bg-[#e8e0cc]/80" },
-    moderate: { label: "Moderate plan", className: "bg-[#f5c542] text-[#1d1d1f] hover:bg-[#f5c542]/80" },
-    aggressive: { label: "Aggressive plan", className: "bg-[#ff9500] text-white hover:bg-[#ff9500]/80" },
+    conservative: { label: "Play it safe", className: "bg-[#e8e0cc] text-[#1d1d1f] hover:bg-[#e8e0cc]/80" },
+    moderate: { label: "Balanced", className: "bg-[#f5c542] text-[#1d1d1f] hover:bg-[#f5c542]/80" },
+    aggressive: { label: "Go for it", className: "bg-[#ff9500] text-white hover:bg-[#ff9500]/80" },
   }
 
   const riskBadge = riskTolerance ? riskConfig[riskTolerance] : null
@@ -422,7 +422,7 @@ export function FreedomCalculator({ initialGoal, riskTolerance }: FreedomCalcula
         toast.error(result.error)
         return
       }
-      toast.success("Escape plan saved")
+      toast.success("Quit plan saved")
     })
   }
 
